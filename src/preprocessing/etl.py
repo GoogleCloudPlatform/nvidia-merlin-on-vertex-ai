@@ -75,8 +75,14 @@ def convert_csv_to_parquet(
     shuffle=None
 ):
   """Convert CSV file to parquet and write to GCS."""
-  if shuffle:
-    shuffle = getattr(Shuffle, shuffle)
+  if shuffle == 'None':
+    shuffle = None
+  else:
+    try:
+      shuffle = getattr(Shuffle, shuffle)
+    except:
+      print('Shuffle method not available. Using default.')
+      shuffle = None
 
   dataset.to_parquet(
       output_path,
