@@ -194,8 +194,14 @@ def save_dataset(
     shuffle=None
 ):
   """Save dataset to parquet files to path."""
-  if shuffle:
-    shuffle = getattr(Shuffle, shuffle)
+  if shuffle == 'None':
+    shuffle = None
+  else:
+    try:
+      shuffle = getattr(Shuffle, shuffle)
+    except:
+      print('Shuffle method not available. Using default.')
+      shuffle = None
 
   dataset.to_parquet(
       output_path=output_path,
