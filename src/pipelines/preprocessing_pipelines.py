@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Preprocessing pipelines."""
-from typing import Any
+
 from . import components
 from . import config
 from kfp.v2 import dsl
@@ -25,8 +25,8 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
     pipeline_root=config.PREPROCESS_CSV_PIPELINE_ROOT
 )
 def preprocessing_csv(
-    train_paths: list[Any],
-    valid_paths: list[Any],
+    train_paths: list,
+    valid_paths: list,
     sep: str,
     num_output_files_train: int,
     num_output_files_valid: int,
