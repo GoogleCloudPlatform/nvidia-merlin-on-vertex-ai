@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """KFP components."""
-from typing import Any
+
 from typing import Optional
 from . import config
 
@@ -30,7 +30,7 @@ from kfp.v2.dsl import Output
 )
 def convert_csv_to_parquet_op(
     output_dataset: Output[Dataset],
-    data_paths: list[Any],
+    data_paths: list,
     split: str,
     sep: str,
     num_output_files: int,
@@ -470,8 +470,8 @@ def upload_vertex_model(
     region: str,
     display_name: str,
     serving_container_image_uri: str,
-    # serving_container_environment_variables: dict[Any, Any],
-    labels: dict[Any, Any]
+    # serving_container_environment_variables: dict,
+    labels: dict
 ):
   """Uploads model to vertex AI."""
   import logging
