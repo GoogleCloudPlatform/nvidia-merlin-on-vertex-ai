@@ -1,4 +1,4 @@
-import test_components
+from preprocessing import components
 
 # Standard Libraries
 import argparse
@@ -21,7 +21,7 @@ def convert_csv_to_parquet_op(args):
 
     logging.info(f'Starting job.')
 
-    output_dataset = test_components.convert_csv_to_parquet_op(
+    output_dataset = components.convert_csv_to_parquet_fn(
         output_dataset=output_dataset,
         data_paths=data_paths,
         split=args.split,
@@ -53,7 +53,7 @@ def analyze_dataset_op(args):
 
     logging.info(f'Starting job.')
 
-    test_components.analyze_dataset_op(
+    components.analyze_dataset_fn(
         parquet_dataset = parquet_dataset, #: Input[Dataset]
         workflow = workflow, #: Output[Artifact]
         n_workers = args.n_workers,
@@ -86,7 +86,7 @@ def transform_dataset_op(args):
 
     logging.info(f'Starting job.')
  
-    return test_components.transform_dataset_op(
+    return components.transform_dataset_fn(
         workflow = workflow,
         parquet_dataset = parquet_dataset,
         transformed_dataset = transformed_dataset,
@@ -106,7 +106,7 @@ def export_parquet_from_bq_op(args):
 
     logging.info(f'Starting job.')
 
-    return test_components.export_parquet_from_bq_op(
+    return components.export_parquet_from_bq_fn(
         output_dataset = output_dataset,
         bq_project = args.bq_project,
         bq_location = args.bq_location,

@@ -20,8 +20,7 @@ setup(
     version='0.1',
     description='ETL modules',
     url='#',
-    author='Author',
-    author_email='test@gmail.com',
+    author='Google Cloud',
     license='Apache 2.0',
     packages=['preprocessing'],
     zip_safe=False
