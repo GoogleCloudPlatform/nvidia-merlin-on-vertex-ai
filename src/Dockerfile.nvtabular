@@ -21,7 +21,8 @@ RUN pip install google-cloud-bigquery gcsfs
 RUN pip install google-cloud-aiplatform==1.7.0 kfp==1.8.9
 
 COPY ./preprocessing ./preprocessing
+COPY ./serving ./serving
 COPY setup.py .
 COPY feature_utils.py .
 
-RUN pip install .
+RUN pip install -e .

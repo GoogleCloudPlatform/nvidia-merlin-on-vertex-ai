@@ -14,6 +14,7 @@
 """Setup definition for ETL module."""
 
 from setuptools import setup
+from setuptools import find_packages
 
 setup(
     name='preprocessing',
@@ -22,6 +23,6 @@ setup(
     url='#',
     author='Google Cloud',
     license='Apache 2.0',
-    packages=['preprocessing'],
+    packages=['preprocessing', 'serving'],
     zip_safe=False
 )
