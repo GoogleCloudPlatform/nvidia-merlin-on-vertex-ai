@@ -207,7 +207,7 @@ def export_parquet_from_bq_op(
   """
   from preprocessing.components import export_parquet_from_bq_fn
 
-  export_parquet_from_bq_op(
+  export_parquet_from_bq_fn(
     output_dataset = output_dataset,
     bq_project = bq_project,
     bq_location = bq_location,
