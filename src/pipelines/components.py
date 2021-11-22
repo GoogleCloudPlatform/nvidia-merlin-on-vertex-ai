@@ -217,7 +217,10 @@ def export_parquet_from_bq_op(
   )
 
 
-@dsl.component
+@dsl.component(
+    base_image=config.NVT_IMAGE_URI,
+    install_kfp_package=False
+)
 def train_hugectr_op(
     transformed_train_dataset: Input[Dataset],
     transformed_valid_dataset: Input[Dataset],
@@ -318,7 +321,8 @@ def train_hugectr_op(
 
 
 @dsl.component(
-    base_image=config.NVT_IMAGE_URI
+    base_image=config.NVT_IMAGE_URI,
+    install_kfp_package=False
 )
 def export_triton_ensemble(
     model: Input[Model],
