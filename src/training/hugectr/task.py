@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import time
+import sys
 
 import hugectr
 from hugectr.inference import CreateInferenceSession
@@ -276,7 +277,8 @@ def parse_args():
 
 if __name__ == '__main__':
   logging.basicConfig(format='%(asctime)s - %(message)s',
-                      level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S')
+                      level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S',
+                      stream=sys.stdout)
 
   parsed_args = parse_args()
 
