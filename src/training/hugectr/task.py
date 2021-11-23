@@ -17,6 +17,7 @@ import argparse
 import json
 import logging
 import os
+import sys
 import time
 
 import hugectr
@@ -276,7 +277,9 @@ def parse_args():
 
 if __name__ == '__main__':
   logging.basicConfig(format='%(asctime)s - %(message)s',
-                      level=logging.INFO, datefmt='%d-%m-%y %H:%M:%S')
+                      level=logging.INFO, 
+                      datefmt='%d-%m-%y %H:%M:%S',
+                      stream=sys.stdout)
 
   parsed_args = parse_args()
 
