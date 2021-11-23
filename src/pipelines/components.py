@@ -350,15 +350,18 @@ def export_triton_ensemble(
       continuous_columns=feature_utils.continuous_columns(),
       label_columns=feature_utils.label_columns(),
       num_slots=num_slots,
-      max_nnz=num_slots,
-      num_outputs=max_nnz,
+      max_nnz=max_nnz,
+      num_outputs=len(feature_utils.label_columns()),
       embedding_vector_size=embedding_vector_size,
       max_batch_size=max_batch_size,
       model_repository_path=model_repository_path
   )
   logging.info('Triton model exported.')
 
-
+@dsl.component(
+    base_image=config.NVT_IMAGE_URI,
+    install_kfp_package=False
+)
 def upload_vertex_model(
     exported_model: Input[Artifact],
     uploaded_model: Output[Artifact],
