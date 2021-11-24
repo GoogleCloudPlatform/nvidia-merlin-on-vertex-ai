@@ -56,7 +56,7 @@ A flexible and powerful experimentation and development environment is critical 
 
 ![NVIDIA Merlin dev](images/dev-env.png)
 
-The environment is based on [Vertex AI Workbench](https://cloud.google.com/vertex-ai/docs/workbench/introduction). Container images based on NVIDIA NGC [Merlin training]() and [Merlin inference]() images are installed as managed notebooks kernels augmenting the standard features of a managed notebook instance that include UI and programmatic interfaces to Google Cloud services.
+The environment is based on [Vertex AI Workbench](https://cloud.google.com/vertex-ai/docs/workbench/introduction). Container images based on NVIDIA NGC [Merlin training](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/merlin/containers/merlin-training) and [Merlin inference](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/merlin/containers/merlin-inference) images are installed as managed notebooks kernels augmenting the standard features of a managed notebook instance that include UI and programmatic interfaces to Google Cloud services.
 
 
 ## Repository structure
@@ -68,7 +68,7 @@ Currently, the repo includes the following notebooks:
 1. [00-dataset-management](00-dataset-management.ipynb) - describes and explores the Criteo dataset, and loads it to BigQuery.
 2. [01-dataset-preprocessing](01-dataset-preprocessing.ipynb) - guidance for large scaled data preprocessing with NVTabular and Vertex Pipelines
 3. [02-model-training-hugectr](02-model-training-hugectr.ipynb) - guidance for training HugeCTR models with Vertex Training. 
-4. [03-model-inference-hugectr](03-model-inference-triton.ipynb) - guidance for deploying Trition ensemble models with Vertex Prediction
+4. [03-model-inference-hugectr](03-model-inference-hugectr.ipynb) - guidance for deploying Trition ensemble models with Vertex Prediction
 5. [04-e2e-pipeline](04-e2e-pipeline.ipynb) - guidance for building an end-to-end data preprocessing, training, and deployment pipeline
 
 The Python modules are in the `src` folder:
