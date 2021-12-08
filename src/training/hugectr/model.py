@@ -71,7 +71,7 @@ def create_model(
   model.add(hugectr.SparseEmbedding(
       embedding_type=hugectr.Embedding_t.LocalizedSlotSparseEmbeddingHash,
       workspace_size_per_gpu_in_mb=workspace_size_per_gpu,
-      embedding_vec_size=11,
+      embedding_vec_size=16,
       combiner="sum",
       sparse_embedding_name="sparse_embedding1",
       bottom_name="data1",
