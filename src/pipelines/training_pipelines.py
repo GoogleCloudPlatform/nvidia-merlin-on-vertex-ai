@@ -13,6 +13,8 @@
 # limitations under the License.
 """Training pipelines."""
 
+import json
+
 from . import components
 from . import config
 from kfp.v2 import dsl
@@ -33,7 +35,7 @@ def training_bq(
     dropout_rate: float,
     lr: float,
     num_epochs: int,
-    eval_interva: int,
+    eval_interval: int,
     snapshot: int,
     display_interval: int
 ):
@@ -106,14 +108,15 @@ def training_bq(
 
   train_hugectr = components.train_hugectr_op(
       transformed_train_dataset=transform_train_dataset.outputs[
-          'output_dataset'],
+          'transformed_dataset'],
       transformed_valid_dataset=transform_valid_dataset.outputs[
-          'output_dataset'],
+          'transformed_dataset'],
       model_name=config.MODEL_NAME,
-      project=config.PROJECT,
+      project=config.PROJECT_ID,
       region=config.REGION,
       service_account=config.VERTEX_SA,
       job_display_name=f'train-{config.MODEL_DISPLAY_NAME}',
+      training_image_url=config.HUGECTR_IMAGE_URI,
       replica_count=int(config.REPLICA_COUNT),
       machine_type=config.MACHINE_TYPE,
       accelerator_type=config.ACCELERATOR_TYPE,
@@ -126,7 +129,7 @@ def training_bq(
       dropout_rate=dropout_rate,
       lr=lr,
       num_epochs=num_epochs,
-      eval_interva=eval_interva,
+      eval_interval=eval_interval,
       snapshot=snapshot,
       display_interval=display_interval
   )
@@ -146,11 +149,19 @@ def training_bq(
 
   # ==================== Upload to Vertex Models ======================
 
+  labels = {
+      "bq_dataset_name": config.BQ_DATASET_NAME,
+      "bq_table_name": config.BQ_TRAIN_TABLE_NAME,
+      "pipeline_name": config.TRAINING_PIPELINE_NAME,
+      "pipeline_root": config.TRAINING_PIPELINE_ROOT
+  }
+  labels = json.dumps(labels)
+
   components.upload_vertex_model(
       project=config.PROJECT_ID,
       region=config.REGION,
       display_name=config.MODEL_DISPLAY_NAME,
       exported_model=triton_ensemble.outputs['exported_model'],
       serving_container_image_uri=config.TRITON_IMAGE_URI,
-      serving_container_environment_variables={'KEY': 'VALUE'}
+      labels=labels
   )

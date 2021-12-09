@@ -240,8 +240,8 @@ def train_hugectr_op(
     max_iter: int,
     max_eval_batches: int,
     eval_batches: int,
-    dropout_rate: int,
-    lr: int,
+    dropout_rate: float,
+    lr: float,
     num_epochs: int,
     eval_interval: int,
     snapshot: int,
@@ -369,8 +369,8 @@ def upload_vertex_model(
     region: str,
     display_name: str,
     serving_container_image_uri: str,
-    # serving_container_environment_variables: dict,
-    labels: dict
+    serving_container_environment_variables: dict = dict(),
+    labels: dict = dict()
 ):
   """Uploads model to vertex AI."""
   import logging
