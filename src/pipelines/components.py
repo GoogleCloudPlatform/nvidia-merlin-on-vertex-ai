@@ -265,7 +265,7 @@ def train_hugectr_op(
                                  '_file_list.txt').replace('gs://', '/gcs/')
   valid_data_fuse = os.path.join(transformed_valid_dataset.path,
                                  '_file_list.txt').replace('gs://', '/gcs/')
-  schema_path = os.path.join(transformed_train_dataset.path,
+  schema_path = os.path.join(transformed_train_dataset.path, 'train',
                              'schema.pbtxt').replace('gs://', '/gcs/')
 
   gpus = json.dumps([list(range(accelerator_count))]).replace(' ', '')
