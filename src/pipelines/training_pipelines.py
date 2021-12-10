@@ -114,6 +114,7 @@ def training_bq(
       model_name=config.MODEL_NAME,
       project=config.PROJECT_ID,
       region=config.REGION,
+      staging_location=config.STAGING_LOCATION,
       service_account=config.VERTEX_SA,
       job_display_name=f'train-{config.MODEL_DISPLAY_NAME}',
       training_image_url=config.HUGECTR_IMAGE_URI,

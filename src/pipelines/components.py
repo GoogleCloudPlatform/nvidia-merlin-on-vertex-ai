@@ -228,6 +228,7 @@ def train_hugectr_op(
     model_name: str,
     project: str,
     region: str,
+    staging_location: str,
     service_account: str,
     job_display_name: str,
     training_image_url: str,
@@ -256,7 +257,8 @@ def train_hugectr_op(
 
   vertex_ai.init(
       project=project,
-      location=region
+      location=region,
+      staging_bucket=staging_location
   )
 
   train_data_fuse = os.path.join(transformed_train_dataset.path,
@@ -308,7 +310,7 @@ def train_hugectr_op(
   job = vertex_ai.CustomJob(
       display_name=job_display_name,
       worker_pool_specs=worker_pool_specs,
-      base_output_dir=model.path
+      base_output_dir=model.uri
   )
 
   job.run(
