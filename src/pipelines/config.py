@@ -29,6 +29,8 @@ MODEL_DISPLAY_NAME = os.getenv("MODEL_DISPLAY_NAME",
 WORKSPACE = os.getenv("WORKSPACE",
                       f"gs://{BUCKET}/{MODEL_DISPLAY_NAME}")
 
+STAGING_LOCATION = os.getenv("STAGING_LOCATION", os.path.join(WORKSPACE, "staging"))
+
 BQ_DATASET_NAME = os.getenv("BQ_DATASET_NAME", "criteo")
 BQ_LOCATION = os.getenv("BQ_LOCATION", "US")
 BQ_TRAIN_TABLE_NAME = os.getenv("BQ_TRAIN_TABLE_NAME", "train")
