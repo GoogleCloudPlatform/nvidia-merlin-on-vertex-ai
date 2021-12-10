@@ -13,13 +13,14 @@
 # limitations under the License.
 """Utilities for model training."""
 
-from nvtabular.columns.schema import Schema
-from nvtabular.tags import Tags
+from nvtabular.graph.schema import Schema
+from nvtabular.graph.tags import Tags
 
 
 def retrieve_cardinalities(schema_path):
   """Retrieves cardinalities from schema."""
-  schema = Schema.load_protobuf(schema_path)
+
+  schema = Schema.load(schema_path)
   cardinalities = {
       key: value.properties['embedding_sizes']['cardinality']
       for key, value in schema.column_schemas.items()
