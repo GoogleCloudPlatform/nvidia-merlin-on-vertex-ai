@@ -14,6 +14,7 @@
 """Training pipelines."""
 
 import json
+import time
 
 from . import components
 from . import config
@@ -116,7 +117,7 @@ def training_bq(
       region=config.REGION,
       staging_location=config.STAGING_LOCATION,
       service_account=config.VERTEX_SA,
-      job_display_name=f'train-{config.MODEL_DISPLAY_NAME}',
+      job_display_name=f'train-{config.MODEL_DISPLAY_NAME}-{time.strftime("%Y%m%d_%H%M%S")}',
       training_image_url=config.HUGECTR_IMAGE_URI,
       replica_count=int(config.REPLICA_COUNT),
       machine_type=config.MACHINE_TYPE,
