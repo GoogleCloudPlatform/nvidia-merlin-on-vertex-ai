@@ -56,11 +56,11 @@ TRAINING_PIPELINE_ROOT = os.getenv(
                                            TRAINING_PIPELINE_NAME))
 
 NVT_IMAGE_URI = os.getenv("NVT_IMAGE_URI",
-                          f"gcr.io/{PROJECT_ID}/nvt_preprocessing")
+                          f"gcr.io/{PROJECT_ID}/nvt-preprocessing")
 HUGECTR_IMAGE_URI = os.getenv("HUGECTR_IMAGE_URI",
-                              f"gcr.io/{PROJECT_ID}/hugectr_training")
-TRITON_IMAGE_URI = os.getenv("HUGECTR_IMAGE_URI",
-                             f"gcr.io/{PROJECT_ID}/triton_serving")
+                              f"gcr.io/{PROJECT_ID}/hugectr-training")
+TRITON_IMAGE_URI = os.getenv("TRITON_IMAGE_URI",
+                             f"gcr.io/{PROJECT_ID}/triton-serving")
 
 MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
 CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
