@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG TRITON_VERSION=21.11-tf2-python
+ARG TRITON_VERSION=21.12-tf2-python
 ARG IMAGE=nvcr.io/nvidia/tritonserver:${TRITON_VERSION}-py3
 FROM ${IMAGE}
 ARG RMM_VER=vnightly
@@ -161,7 +161,7 @@ ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python'
 SHELL ["/bin/bash", "-c"]
 
 RUN pip install cupy-cuda114 cachetools fastavro typing_extensions nvtx pandas==1.1.5
-RUN pip install pybind11
+RUN pip install pybind11 gcsfs
 RUN apt install -y rapidjson-dev
 
 # need for testing fixtures must be available for nvt testing
@@ -202,7 +202,7 @@ RUN pip install dask==2021.11.2 distributed==2021.11.2 dask[dataframe]==2021.11.
 RUN pip install pynvml pytest graphviz scikit-learn==0.24.2 scipy matplotlib dask-cuda
 RUN pip install nvidia-pyindex; pip install tritonclient[all] grpcio-channelz
 
-RUN apt update; apt install -y graphviz ;
+RUN apt update; apt install -y graphviz libtbb-dev;
 
 #Hiredis
 RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 https://github.com/redis/hiredis.git && cd - && \
@@ -226,16 +226,26 @@ RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 https://github.com/f
     make -j$(nproc) shared_lib && \
     make install-shared && \
     rm -rf /var/tmp/rocksdb
+    
+# Install LibRdKafka from source
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive && apt-get install -y --no-install-recommends libssl-dev libsasl2-dev liblz4-dev libzstd-dev && \
+    mkdir -p /var/tmp && cd /var/tmp && git clone --depth 1 -b v1.8.2 https://github.com/edenhill/librdkafka.git && cd - && \
+    cd /var/tmp/librdkafka && \
+    ./configure && make -j$(nproc) && make install && \
+    rm -rf /var/tmp/librdkafka
+    
 ENV CPATH=/usr/local/include:$CPATH
 
 # Install HugeCTR
 RUN apt update -y && apt install rapidjson-dev -y
-RUN git clone https://github.com/NVIDIA-Merlin/HugeCTR.git /repos/HugeCTR && \
-      cd /repos/HugeCTR && if [ "$RELEASE" == "true" ] && [ ${HUGECTR_VER} != "vnightly" ]; then git fetch --all --tags && git checkout tags/${HUGECTR_VER}; else git checkout master; fi && \
+RUN git clone https://github.com/NVIDIA-Merlin/HugeCTR.git /hugeCTR && \
+      cd /hugeCTR && if [ "$RELEASE" == "true" ] && [ ${HUGECTR_VER} != "vnightly" ]; then git fetch --all --tags && git checkout tags/${HUGECTR_VER}; else git checkout master; fi && \
       git submodule update --init --recursive && \
       mkdir -p build && cd build &&\
       cmake -DCMAKE_BUILD_TYPE=Release -DSM=$SM -DENABLE_INFERENCE=ON .. && \
       make -j$(nproc) && make install && \
+      chmod +x /usr/local/hugectr/bin/* && \
       export CPATH=/usr/local/hugectr/include:$CPATH && \
       export LIBRARY_PATH=/usr/local/hugectr/lib:$LIBRARY_PATH && \
       git clone https://github.com/triton-inference-server/hugectr_backend /repos/hugectr_inference_backend && \
@@ -245,7 +255,8 @@ RUN git clone https://github.com/NVIDIA-Merlin/HugeCTR.git /repos/HugeCTR && \
             -DTRITON_COMMON_REPO_TAG="r$TRITON_VERSION" \
             -DTRITON_CORE_REPO_TAG="r$TRITON_VERSION" \
             -DTRITON_BACKEND_REPO_TAG="r$TRITON_VERSION" .. && \
-      make -j$(nproc) && make install
+      make -j$(nproc) && make install && \
+      rm -rf /hugectr/build
 
 ENV CPATH=/usr/local/hugectr/include:$CPATH
 ENV LIBRARY_PATH=/usr/local/hugectr/lib:$LIBRARY_PATH
