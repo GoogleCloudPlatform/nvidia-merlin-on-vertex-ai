@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nvcr.io/nvidia/merlin/merlin-training:21.12
+FROM nvcr.io/nvidia/merlin/merlin-training:22.02
 
 WORKDIR /src
 
 RUN pip install -U pip
 RUN pip install google-cloud-bigquery gcsfs
-RUN pip install google-cloud-aiplatform==1.7.0 kfp==1.8.9
+RUN pip install google-cloud-aiplatform kfp
 
 COPY ./preprocessing ./preprocessing
 COPY ./serving ./serving
@@ -26,3 +26,5 @@ COPY setup.py .
 COPY feature_utils.py .
 
 RUN pip install -e .
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/lib:/repos/dist/lib:/usr/local/nvidia
