@@ -40,42 +40,46 @@ def preprocessing_csv(
       data_paths=train_paths,
       split='train',
       sep=sep,
-      shuffle=shuffle,
+      num_output_files=num_output_files_train,
       n_workers=int(config.GPU_LIMIT),
-      num_output_files=num_output_files_train
+      shuffle=shuffle,
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+      workspace=config.WORKSPACE
   )
-  csv_to_parquet_train.set_cpu_limit(config.CPU_LIMIT)
-  csv_to_parquet_train.set_memory_limit(config.MEMORY_LIMIT)
-  csv_to_parquet_train.set_gpu_limit(config.GPU_LIMIT)
-  csv_to_parquet_train.add_node_selector_constraint(GKE_ACCELERATOR_KEY,
-                                                    config.GPU_TYPE)
 
   # === Convert eval dataset from CSV to Parquet
   csv_to_parquet_valid = components.convert_csv_to_parquet_op(
       data_paths=valid_paths,
       split='valid',
       sep=sep,
+      num_output_files=num_output_files_valid,
       n_workers=int(config.GPU_LIMIT),
-      num_output_files=num_output_files_valid
+      shuffle=shuffle,
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+      workspace=config.WORKSPACE
   )
-  csv_to_parquet_valid.set_cpu_limit(config.CPU_LIMIT)
-  csv_to_parquet_valid.set_memory_limit(config.MEMORY_LIMIT)
-  csv_to_parquet_valid.set_gpu_limit(config.GPU_LIMIT)
-  csv_to_parquet_valid.add_node_selector_constraint(GKE_ACCELERATOR_KEY,
-                                                    config.GPU_TYPE)
 
   # ==================== Analyse train dataset ==============================
 
   # === Analyze train data split
   analyze_dataset = components.analyze_dataset_op(
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT)
+      n_workers=int(config.GPU_LIMIT),
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+      workspace=config.WORKSPACE
   )
-  analyze_dataset.set_cpu_limit(config.CPU_LIMIT)
-  analyze_dataset.set_memory_limit(config.MEMORY_LIMIT)
-  analyze_dataset.set_gpu_limit(config.GPU_LIMIT)
-  analyze_dataset.add_node_selector_constraint(GKE_ACCELERATOR_KEY,
-                                               config.GPU_TYPE)
 
   # ==================== Transform train and validation dataset =============
 
@@ -83,25 +87,27 @@ def preprocessing_csv(
   transform_train_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT)
+      n_workers=int(config.GPU_LIMIT),
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+      workspace=config.WORKSPACE
   )
-  transform_train_dataset.set_cpu_limit(config.CPU_LIMIT)
-  transform_train_dataset.set_memory_limit(config.MEMORY_LIMIT)
-  transform_train_dataset.set_gpu_limit(config.GPU_LIMIT)
-  transform_train_dataset.add_node_selector_constraint(GKE_ACCELERATOR_KEY,
-                                                       config.GPU_TYPE)
 
   # === Transform eval data split
   transform_valid_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT)
+      n_workers=int(config.GPU_LIMIT),
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+      workspace=config.WORKSPACE
   )
-  transform_valid_dataset.set_cpu_limit(config.CPU_LIMIT)
-  transform_valid_dataset.set_memory_limit(config.MEMORY_LIMIT)
-  transform_valid_dataset.set_gpu_limit(config.GPU_LIMIT)
-  transform_valid_dataset.add_node_selector_constraint(GKE_ACCELERATOR_KEY,
-                                                       config.GPU_TYPE)
 
 
 @dsl.pipeline(
@@ -140,8 +146,7 @@ def preprocessing_bq(
 
   # === Analyze train data split
   analyze_dataset = components.analyze_dataset_op(
-      parquet_dataset=export_train_from_bq.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT)
+      parquet_dataset=export_train_from_bq.outputs['output_dataset']
   )
   analyze_dataset.set_cpu_limit(config.CPU_LIMIT)
   analyze_dataset.set_memory_limit(config.MEMORY_LIMIT)
@@ -155,7 +160,6 @@ def preprocessing_bq(
   transform_train_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=export_train_from_bq.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT),
       shuffle=shuffle
   )
   transform_train_dataset.set_cpu_limit(config.CPU_LIMIT)
@@ -168,7 +172,6 @@ def preprocessing_bq(
   transform_valid_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=export_valid_from_bq.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT),
       shuffle=shuffle
   )
   transform_valid_dataset.set_cpu_limit(config.CPU_LIMIT)

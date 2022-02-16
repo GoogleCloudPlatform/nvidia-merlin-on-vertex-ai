@@ -62,10 +62,9 @@ HUGECTR_IMAGE_URI = os.getenv("HUGECTR_IMAGE_URI",
 TRITON_IMAGE_URI = os.getenv("TRITON_IMAGE_URI",
                              f"gcr.io/{PROJECT_ID}/triton-serving")
 
-MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
-CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
+INSTANCE_TYPE = os.getenv("INSTANCE_TYPE", "n1-highmem-64")
 GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
-GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
+GPU_TYPE = os.getenv("GPU_TYPE", "NVIDIA_TESLA_T4")
 
 MACHINE_TYPE = os.getenv("MACHINE_TYPE", "a2-highgpu-4g")
 REPLICA_COUNT = os.getenv("REPLICA_COUNT", "1")
