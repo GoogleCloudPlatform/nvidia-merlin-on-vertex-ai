@@ -1,0 +1,400 @@
+feature {
+  name: "label"
+  type: INT
+  int_domain {
+    name: "label"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I1"
+  type: INT
+  int_domain {
+    name: "I1"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I2"
+  type: INT
+  int_domain {
+    name: "I2"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I3"
+  type: INT
+  int_domain {
+    name: "I3"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I4"
+  type: INT
+  int_domain {
+    name: "I4"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I5"
+  type: INT
+  int_domain {
+    name: "I5"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I6"
+  type: INT
+  int_domain {
+    name: "I6"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I7"
+  type: INT
+  int_domain {
+    name: "I7"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I8"
+  type: INT
+  int_domain {
+    name: "I8"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I9"
+  type: INT
+  int_domain {
+    name: "I9"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I10"
+  type: INT
+  int_domain {
+    name: "I10"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I11"
+  type: INT
+  int_domain {
+    name: "I11"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I12"
+  type: INT
+  int_domain {
+    name: "I12"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "I13"
+  type: INT
+  int_domain {
+    name: "I13"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C1"
+  type: INT
+  int_domain {
+    name: "C1"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C2"
+  type: INT
+  int_domain {
+    name: "C2"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C3"
+  type: INT
+  int_domain {
+    name: "C3"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C4"
+  type: INT
+  int_domain {
+    name: "C4"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C5"
+  type: INT
+  int_domain {
+    name: "C5"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C6"
+  type: INT
+  int_domain {
+    name: "C6"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C7"
+  type: INT
+  int_domain {
+    name: "C7"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C8"
+  type: INT
+  int_domain {
+    name: "C8"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C9"
+  type: INT
+  int_domain {
+    name: "C9"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C10"
+  type: INT
+  int_domain {
+    name: "C10"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C11"
+  type: INT
+  int_domain {
+    name: "C11"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C12"
+  type: INT
+  int_domain {
+    name: "C12"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C13"
+  type: INT
+  int_domain {
+    name: "C13"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C14"
+  type: INT
+  int_domain {
+    name: "C14"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C15"
+  type: INT
+  int_domain {
+    name: "C15"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C16"
+  type: INT
+  int_domain {
+    name: "C16"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C17"
+  type: INT
+  int_domain {
+    name: "C17"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C18"
+  type: INT
+  int_domain {
+    name: "C18"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C19"
+  type: INT
+  int_domain {
+    name: "C19"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C20"
+  type: INT
+  int_domain {
+    name: "C20"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C21"
+  type: INT
+  int_domain {
+    name: "C21"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C22"
+  type: INT
+  int_domain {
+    name: "C22"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C23"
+  type: INT
+  int_domain {
+    name: "C23"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C24"
+  type: INT
+  int_domain {
+    name: "C24"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C25"
+  type: INT
+  int_domain {
+    name: "C25"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
+feature {
+  name: "C26"
+  type: INT
+  int_domain {
+    name: "C26"
+    is_categorical: false
+  }
+  annotation {
+  }
+}
