@@ -685,7 +685,6 @@ def train_hugectr_op(
     project: str,
     region: str,
     staging_location: str,
-    service_account: str,
     job_display_name: str,
     training_image_url: str,
     replica_count: int,
@@ -771,7 +770,6 @@ def train_hugectr_op(
 
   job.run(
       sync=True,
-      service_account=service_account,
       restart_job_on_worker_restart=False
   )
 
