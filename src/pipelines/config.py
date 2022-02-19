@@ -32,22 +32,11 @@ WORKSPACE = os.getenv("WORKSPACE",
 STAGING_LOCATION = os.getenv("STAGING_LOCATION", 
                              os.path.join(WORKSPACE, "staging"))
 
-BQ_DATASET_NAME = os.getenv("BQ_DATASET_NAME", "criteo")
-BQ_LOCATION = os.getenv("BQ_LOCATION", "US")
-BQ_TRAIN_TABLE_NAME = os.getenv("BQ_TRAIN_TABLE_NAME", "train")
-BQ_VALID_TABLE_NAME = os.getenv("BQ_VALID_TABLE_NAME", "valid")
-
 PREPROCESS_CSV_PIPELINE_NAME = os.getenv("PREPROCESS_CSV_PIPELINE_NAME",
                                          "nvt-csv-pipeline")
 PREPROCESS_CSV_PIPELINE_ROOT = os.getenv(
     "PREPROCESS_CSV_PIPELINE_ROOT", os.path.join(WORKSPACE,
                                                  PREPROCESS_CSV_PIPELINE_NAME))
-
-PREPROCESS_BQ_PIPELINE_NAME = os.getenv("PREPROCESS_BQ_PIPELINE_NAME",
-                                        "nvt-bq-pipeline")
-PREPROCESS_BQ_PIPELINE_ROOT = os.getenv(
-    "PREPROCESS_BQ_PIPELINE_ROOT", os.path.join(WORKSPACE,
-                                                PREPROCESS_BQ_PIPELINE_NAME))
 
 TRAINING_PIPELINE_NAME = os.getenv("TRAINING_PIPELINE_NAME",
                                    "merlin-e2e-pipeline")

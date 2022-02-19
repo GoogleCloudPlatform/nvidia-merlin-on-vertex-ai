@@ -82,7 +82,6 @@ def convert_csv_to_parquet_op(
   from google.cloud import aiplatform as vertex_ai
 
   logging.info('Base path in %s', output_dataset.path)
-  fuse_output_dir = os.path.join(output_dataset.path, split)
 
   # Write metadata
   output_dataset.metadata['split'] = split
@@ -101,7 +100,7 @@ def convert_csv_to_parquet_op(
               "args": [
                   '--task=convert',
                   f"--csv_data_path={' '.join(data_paths)}",
-                  f'--output_path={fuse_output_dir}',
+                  f'--output_path={os.path.join(output_dataset.path, split)}',
                   f'--sep={sep}',
                   f'--n_workers={n_workers}',
                   f'--output_files={num_output_files}',

@@ -61,46 +61,6 @@ def create_csv_dataset(
     )
 
 
-def create_csv_dataset_with_schema(
-    data_paths,
-    sep,
-    recursive,
-    frac_size,
-    client,
-    schema_path='schema.pbtxt'
-):
-  """Create nvt.Dataset definition for CSV files."""
-  fs_spec = fsspec.filesystem('gs')
-  rec_symbol = '**' if recursive else '*'
-
-  valid_paths = []
-  for path in data_paths:
-    try:
-      if fs_spec.isfile(path):
-        valid_paths.append(path)
-      else:
-        path = os.path.join(path, rec_symbol)
-        for i in fs_spec.glob(path):
-          if fs_spec.isfile(i):
-            valid_paths.append(f'gs://{i}')
-    except FileNotFoundError as fnf_expt:
-      print(fnf_expt)
-      print('Incorrect path: {path}.')
-    except OSError as os_err:
-      print(os_err)
-      print('Verify access to the bucket.')
-
-    return nvt.Dataset(
-        path_or_source=valid_paths,
-        engine='csv',
-        sep=sep,
-        schema=nvt.Schema.load(schema_path=schema_path),
-        part_mem_fraction=frac_size,
-        client=client,
-        assume_missing=True
-    )
-
-
 def convert_csv_to_parquet(
     output_path,
     dataset,
@@ -285,55 +245,6 @@ def main_convert(args):
     args.output_files
   )
 
-def main_convert_from_bq(args):
-  logging.info('Creating cluster')
-  client = create_cluster(
-    args.n_workers,
-    args.device_limit_frac,
-    args.device_pool_frac,
-    args.memory_limit
-  )
-
-  logging.info('Creating CSV dataset')
-  dataset = create_csv_dataset_with_schema(
-    data_paths=args.csv_data_path, 
-    sep=args.sep,
-    recursive=False, 
-    frac_size=args.frac_size,
-    client=client
-  )
-
-  logging.info('Converting CSV to Parquet')
-  convert_csv_to_parquet(
-    args.output_path,
-    dataset,
-    args.output_files
-  )
-
-
-def main_repartition_parquet(args):
-  logging.info('Creating cluster')
-  client = create_cluster(
-    args.n_workers,
-    args.device_limit_frac,
-    args.device_pool_frac,
-    args.memory_limit
-  )
-
-  logging.info('Creating Parquet dataset')
-  dataset = create_parquet_dataset(
-    client=client, 
-    data_path=args.parquet_data_path, 
-    frac_size=args.frac_size
-  )
-
-  logging.info('Repartitioning Parquet')
-  convert_csv_to_parquet(
-    args.output_path,
-    dataset,
-    args.output_files
-  )
-
 
 def main_analyse(args):
   logging.info('Creating cluster')
@@ -458,14 +369,10 @@ if __name__ == '__main__':
 
   if parsed_args.task == 'convert':
     main_convert(parsed_args)
-  elif parsed_args.task == 'convert_from_bq':
-    main_convert_from_bq(parsed_args)
   elif parsed_args.task == 'analyse':
     main_analyse(parsed_args)
   elif parsed_args.task == 'transform':
     main_transform(parsed_args)
-  elif parsed_args.task == 'repartition_parquet':
-    main_repartition_parquet(parsed_args)
 
   end_time = time.time()
   elapsed_time = end_time - start_time
