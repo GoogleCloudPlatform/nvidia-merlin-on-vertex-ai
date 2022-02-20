@@ -8,7 +8,6 @@ import time
 from dask.distributed import Client
 from dask_cuda import LocalCUDACluster
 import fsspec
-from google.cloud import bigquery
 import nvtabular as nvt
 from nvtabular.io.shuffle import Shuffle
 from nvtabular.ops import Categorify
@@ -185,6 +184,7 @@ def save_workflow(
 def save_dataset(
     dataset,
     output_path,
+    output_files,
     shuffle=None
 ):
   """Save dataset to parquet files to path."""
@@ -199,7 +199,8 @@ def save_dataset(
 
   dataset.to_parquet(
       output_path=output_path,
-      shuffle=shuffle
+      shuffle=shuffle,
+      output_files=output_files
   )
 
 
@@ -304,7 +305,8 @@ def main_transform(args):
   logging.info('Saving transformed dataset')
   save_dataset(
     transformed_dataset,
-    output_path=args.output_path
+    output_path=args.output_path,
+    output_files=args.output_files
   )
 
 

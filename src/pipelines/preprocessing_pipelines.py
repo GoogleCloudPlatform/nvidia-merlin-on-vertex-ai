@@ -87,6 +87,7 @@ def preprocessing_csv(
   components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
+      num_output_files=num_output_files_train,
       n_workers=int(config.GPU_LIMIT),
       instance_type=config.INSTANCE_TYPE,
       gpu_type=config.GPU_TYPE,
@@ -100,6 +101,7 @@ def preprocessing_csv(
   components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
+      num_output_files=num_output_files_valid,
       n_workers=int(config.GPU_LIMIT),
       instance_type=config.INSTANCE_TYPE,
       gpu_type=config.GPU_TYPE,
