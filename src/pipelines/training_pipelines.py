@@ -27,7 +27,12 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
     name=config.TRAINING_PIPELINE_NAME,
     pipeline_root=config.TRAINING_PIPELINE_ROOT
 )
-def training_bq(
+def training_pipeline(
+    train_paths: list,
+    valid_paths: list,
+    num_output_files_train: int,
+    num_output_files_valid: int,
+    sep: str,
     shuffle: str,
     per_gpu_batch_size: int,
     max_iter: int,
@@ -40,31 +45,35 @@ def training_bq(
     snapshot: int,
     display_interval: int
 ):
-  """Pipeline to train a HugeCTR model with data exported from BQ."""
-  # ==================== Exporting tables as Parquet ====================
+  """Pipeline to train a HugeCTR model with data exported from GCS."""
+  # ==================== Exporting tables as CSV ====================
 
-  # === Export train table as parquet
-  export_train_from_bq = components.export_parquet_from_bq_op(
-      bq_project=config.PROJECT_ID,
-      bq_dataset_name=config.BQ_DATASET_NAME,
-      bq_location=config.BQ_LOCATION,
-      bq_table_name=config.BQ_TRAIN_TABLE_NAME,
+  # === Convert train dataset from CSV to Parquet
+  csv_to_parquet_train = components.convert_csv_to_parquet_op(
+      data_paths=train_paths,
       split='train',
+      sep=sep,
+      num_output_files=num_output_files_train,
+      n_workers=int(config.GPU_LIMIT),
+      shuffle=shuffle,
       instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
       image_uri=config.NVT_IMAGE_URI,
       project_id=config.PROJECT_ID,
       region=config.REGION,
       workspace=config.WORKSPACE
   )
 
-  # === Export valid table as parquet
-  export_valid_from_bq = components.export_parquet_from_bq_op(
-      bq_project=config.PROJECT_ID,
-      bq_dataset_name=config.BQ_DATASET_NAME,
-      bq_location=config.BQ_LOCATION,
-      bq_table_name=config.BQ_TRAIN_TABLE_NAME,
+  # === Convert eval dataset from CSV to Parquet
+  csv_to_parquet_valid = components.convert_csv_to_parquet_op(
+      data_paths=valid_paths,
       split='valid',
+      sep=sep,
+      num_output_files=num_output_files_valid,
+      n_workers=int(config.GPU_LIMIT),
+      shuffle=shuffle,
       instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
       image_uri=config.NVT_IMAGE_URI,
       project_id=config.PROJECT_ID,
       region=config.REGION,
@@ -75,7 +84,7 @@ def training_bq(
 
   # === Analyze train data split
   analyze_dataset = components.analyze_dataset_op(
-      parquet_dataset=export_train_from_bq.outputs['output_dataset'],
+      parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
       n_workers=int(config.GPU_LIMIT),
       instance_type=config.INSTANCE_TYPE,
       gpu_type=config.GPU_TYPE,
@@ -90,7 +99,8 @@ def training_bq(
   # === Transform train data split
   transform_train_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
-      parquet_dataset=export_train_from_bq.outputs['output_dataset'],
+      parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
+      num_output_files=num_output_files_train,
       n_workers=int(config.GPU_LIMIT),
       instance_type=config.INSTANCE_TYPE,
       gpu_type=config.GPU_TYPE,
@@ -103,7 +113,8 @@ def training_bq(
   # === Transform eval data split
   transform_valid_dataset = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
-      parquet_dataset=export_valid_from_bq.outputs['output_dataset'],
+      parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
+      num_output_files=num_output_files_valid,
       n_workers=int(config.GPU_LIMIT),
       instance_type=config.INSTANCE_TYPE,
       gpu_type=config.GPU_TYPE,
@@ -124,7 +135,6 @@ def training_bq(
       project=config.PROJECT_ID,
       region=config.REGION,
       staging_location=config.STAGING_LOCATION,
-      service_account=config.VERTEX_SA,
       job_display_name=f'train-{config.MODEL_DISPLAY_NAME}-{time.strftime("%Y%m%d_%H%M%S")}',
       training_image_url=config.HUGECTR_IMAGE_URI,
       replica_count=int(config.REPLICA_COUNT),
@@ -159,19 +169,10 @@ def training_bq(
 
   # ==================== Upload to Vertex Models ======================
 
-  labels = {
-      "bq_dataset_name": config.BQ_DATASET_NAME,
-      "bq_table_name": config.BQ_TRAIN_TABLE_NAME,
-      "pipeline_name": config.TRAINING_PIPELINE_NAME,
-      "pipeline_root": config.TRAINING_PIPELINE_ROOT
-  }
-  labels = json.dumps(labels)
-
   components.upload_vertex_model(
       project=config.PROJECT_ID,
       region=config.REGION,
       display_name=config.MODEL_DISPLAY_NAME,
       exported_model=triton_ensemble.outputs['exported_model'],
-      serving_container_image_uri=config.TRITON_IMAGE_URI,
-      labels=labels
+      serving_container_image_uri=config.TRITON_IMAGE_URI
   )
