@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 import os
 import sys
@@ -48,16 +47,16 @@ def create_csv_dataset(
       print(os_err)
       print('Verify access to the bucket.')
 
-    return nvt.Dataset(
-        path_or_source=valid_paths,
-        engine='csv',
-        names=list(col_dtypes.keys()),
-        sep=sep,
-        dtypes=col_dtypes,
-        part_mem_fraction=frac_size,
-        client=client,
-        assume_missing=True
-    )
+  return nvt.Dataset(
+      path_or_source=valid_paths,
+      engine='csv',
+      names=list(col_dtypes.keys()),
+      sep=sep,
+      dtypes=col_dtypes,
+      part_mem_fraction=frac_size,
+      client=client,
+      assume_missing=True
+  )
 
 
 def convert_csv_to_parquet(
@@ -147,40 +146,6 @@ def create_parquet_dataset(
   )
 
 
-def analyze_dataset(
-    workflow,
-    dataset,
-):
-  """Calculate statistics for a given workflow."""
-  workflow.fit(dataset)
-  return workflow
-
-
-def transform_dataset(
-    dataset,
-    workflow
-):
-  """Apply the transformations to the dataset."""
-  workflow.transform(dataset)
-  return dataset
-
-
-def load_workflow(
-    workflow_path,
-    client,
-):
-  """Load a workflow definition from a path."""
-  return nvt.Workflow.load(workflow_path, client)
-
-
-def save_workflow(
-    workflow,
-    output_path
-):
-  """Save workflow to a path."""
-  workflow.save(output_path)
-
-
 def save_dataset(
     dataset,
     output_path,
@@ -200,7 +165,8 @@ def save_dataset(
   dataset.to_parquet(
       output_path=output_path,
       shuffle=shuffle,
-      output_files=output_files
+      output_files=output_files,
+      write_hugectr_keyset=True
   )
 
 
@@ -220,6 +186,8 @@ def get_criteo_col_dtypes() -> Dict[str, Union[str, np.int32]]:
   return col_dtypes
 
 
+# --------------------------------------------
+# ---------- Convert CSV to Parquet ----------
 def main_convert(args):
   logging.info('Creating cluster')
   client = create_cluster(
@@ -245,8 +213,10 @@ def main_convert(args):
     dataset,
     args.output_files
   )
+# --------------------------------------------
 
-
+# --------------------------------------------
+# -------------- Analyse Dataset -------------
 def main_analyse(args):
   logging.info('Creating cluster')
   client = create_cluster(
@@ -268,12 +238,14 @@ def main_analyse(args):
   criteo_workflow = create_criteo_nvt_workflow(client)
 
   logging.info('Analyzing dataset')
-  criteo_workflow = analyze_dataset(criteo_workflow, dataset)
+  criteo_workflow = criteo_workflow.fit(dataset)
 
   logging.info('Saving Workflow')
-  save_workflow(criteo_workflow, args.output_path)
+  criteo_workflow.save(args.output_path)
+# --------------------------------------------
 
-
+# --------------------------------------------
+# -------- Transform Parquet Dataset ---------
 def main_transform(args):
   logging.info('Creating cluster')
   client = create_cluster(
@@ -291,16 +263,10 @@ def main_transform(args):
   )
 
   logging.info('Loading Workflow')
-  criteo_workflow = load_workflow(
-    args.workflow_path,
-    client
-  )
+  criteo_workflow = nvt.Workflow.load(args.workflow_path, client)
 
   logging.info('Transforming Dataset')
-  transformed_dataset = transform_dataset(
-    dataset,
-    criteo_workflow
-  )
+  transformed_dataset = criteo_workflow.transform(dataset)
 
   logging.info('Saving transformed dataset')
   save_dataset(
@@ -308,6 +274,7 @@ def main_transform(args):
     output_path=args.output_path,
     output_files=args.output_files
   )
+# --------------------------------------------
 
 
 def parse_args():

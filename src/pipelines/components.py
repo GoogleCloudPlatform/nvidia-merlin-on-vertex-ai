@@ -475,8 +475,7 @@ def upload_vertex_model(
   vertex_model = vertex_ai.Model.upload(
       display_name=display_name,
       artifact_uri=exported_model_path,
-      serving_container_image_uri=serving_container_image_uri,
-      labels=labels
+      serving_container_image_uri=serving_container_image_uri
   )
 
   model_uri = vertex_model.gca_resource.name
