@@ -18,13 +18,35 @@ from nvtabular.utils import device_mem_size
 import numpy as np
 from typing import Dict, List, Union
 
+
+def create_cluster(
+    n_workers,
+    device_limit_frac,
+    device_pool_frac,
+    memory_limit
+):
+  """Create a Dask cluster to apply the transformations steps to the Dataset."""
+  device_size = device_mem_size()
+  device_limit = int(device_limit_frac * device_size)
+  device_pool_size = int(device_pool_frac * device_size)
+  rmm_pool_size = (device_pool_size // 256) * 256
+
+  cluster = LocalCUDACluster(
+      n_workers=n_workers,
+      device_memory_limit=device_limit,
+      rmm_pool_size=rmm_pool_size,
+      memory_limit=memory_limit
+  )
+
+  return Client(cluster)
+
+
 def create_csv_dataset(
     data_paths,
     sep,
     recursive,
     col_dtypes,
-    frac_size,
-    client
+    frac_size
 ):
   """Create nvt.Dataset definition for CSV files."""
   fs_spec = fsspec.filesystem('gs')
@@ -54,7 +76,6 @@ def create_csv_dataset(
       sep=sep,
       dtypes=col_dtypes,
       part_mem_fraction=frac_size,
-      client=client,
       assume_missing=True
   )
 
@@ -82,7 +103,7 @@ def convert_csv_to_parquet(
   )
 
 
-def create_criteo_nvt_workflow(client):
+def create_criteo_nvt_workflow():
   """Create a nvt.Workflow definition with transformation all the steps."""
   # Columns definition
   cont_names = ['I' + str(x) for x in range(1, 14)]
@@ -97,41 +118,21 @@ def create_criteo_nvt_workflow(client):
   features = cat_features + cont_features + ['label']
 
   # Create and save workflow
-  return nvt.Workflow(features, client)
-
-
-def create_cluster(
-    n_workers,
-    device_limit_frac,
-    device_pool_frac,
-    memory_limit
-):
-  """Create a Dask cluster to apply the transformations steps to the Dataset."""
-  device_size = device_mem_size()
-  device_limit = int(device_limit_frac * device_size)
-  device_pool_size = int(device_pool_frac * device_size)
-  rmm_pool_size = (device_pool_size // 256) * 256
-
-  cluster = LocalCUDACluster(
-      n_workers=n_workers,
-      device_memory_limit=device_limit,
-      rmm_pool_size=rmm_pool_size,
-      memory_limit=memory_limit
-  )
-
-  return Client(cluster)
+  return nvt.Workflow(features)
 
 
 def create_parquet_dataset(
-    client,
     data_path,
-    frac_size
+    part_mem_frac
 ):
   """Create a nvt.Dataset definition for the parquet files."""
   fs = fsspec.filesystem('gs')
   file_list = fs.glob(
       os.path.join(data_path, '*.parquet')
   )
+
+  device_size = device_mem_size()
+  part_size = int(part_mem_frac * device_size)
 
   if not file_list:
     raise FileNotFoundError('Parquet file(s) not found')
@@ -141,8 +142,7 @@ def create_parquet_dataset(
   return nvt.Dataset(
       file_list,
       engine='parquet',
-      part_mem_fraction=frac_size,
-      client=client
+      part_size=part_size
   )
 
 
@@ -162,11 +162,28 @@ def save_dataset(
       print('Shuffle method not available. Using default.')
       shuffle = None
 
+  CATEGORICAL_COLUMNS = ["C" + str(x) for x in range(1, 27)]
+  CONTINUOUS_COLUMNS = ["I" + str(x) for x in range(1, 14)]
+  LABEL_COLUMNS = ["label"]
+
+  dict_dtypes = {}
+  for col in CATEGORICAL_COLUMNS:
+    dict_dtypes[col] = np.int64
+
+  for col in CONTINUOUS_COLUMNS:
+    dict_dtypes[col] = np.float32
+
+  for col in LABEL_COLUMNS:
+    dict_dtypes[col] = np.float32
+
   dataset.to_parquet(
       output_path=output_path,
       shuffle=shuffle,
       output_files=output_files,
-      write_hugectr_keyset=True
+      dtypes=dict_dtypes,
+      cats=CATEGORICAL_COLUMNS,
+      conts=CONTINUOUS_COLUMNS,
+      labels=LABEL_COLUMNS
   )
 
 
@@ -203,8 +220,7 @@ def main_convert(args):
     args.sep,
     False, 
     get_criteo_col_dtypes(), 
-    args.frac_size, 
-    client
+    args.frac_size
   )
 
   logging.info('Converting CSV to Parquet')
@@ -228,14 +244,13 @@ def main_analyse(args):
 
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
-    client=client, 
     data_path=args.parquet_data_path,
-    frac_size=args.frac_size
+    part_mem_frac=args.part_mem_frac
   )
 
   logging.info('Creating Workflow')
   # Create Workflow
-  criteo_workflow = create_criteo_nvt_workflow(client)
+  criteo_workflow = create_criteo_nvt_workflow()
 
   logging.info('Analyzing dataset')
   criteo_workflow = criteo_workflow.fit(dataset)
@@ -257,9 +272,8 @@ def main_transform(args):
 
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
-    client=client, 
     data_path=args.parquet_data_path, 
-    frac_size=args.frac_size
+    part_mem_frac=args.part_mem_frac
   )
 
   logging.info('Loading Workflow')
@@ -309,6 +323,10 @@ def parse_args():
                       type=float,
                       required=False,
                       default=0.10)
+  parser.add_argument('--part_mem_frac',
+                      type=float,
+                      required=False,
+                      default=0.15)
   parser.add_argument('--memory_limit',
                       type=int,
                       required=False,
