@@ -52,14 +52,21 @@ TRITON_IMAGE_URI = os.getenv("TRITON_IMAGE_URI",
                              f"gcr.io/{PROJECT_ID}/triton-serving")
 
 INSTANCE_TYPE = os.getenv("INSTANCE_TYPE", "n1-highmem-64")
-GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
-GPU_TYPE = os.getenv("GPU_TYPE", "NVIDIA_TESLA_T4")
+#GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
+#GPU_TYPE = os.getenv("GPU_TYPE", "NVIDIA_TESLA_T4")
 
-MACHINE_TYPE = os.getenv("MACHINE_TYPE", "a2-highgpu-4g")
+MACHINE_TYPE = os.getenv("MACHINE_TYPE", "a2-highgpu-2")
 REPLICA_COUNT = os.getenv("REPLICA_COUNT", "1")
 ACCELERATOR_TYPE = os.getenv("ACCELERATOR_TYPE", "NVIDIA_TESLA_A100")
-ACCELERATOR_NUM = os.getenv("ACCELERATOR_NUM", "4")
-NUM_WORKERS = os.getenv("NUM_WORKERS", "4")
+ACCELERATOR_NUM = os.getenv("ACCELERATOR_NUM", "2")
+NUM_WORKERS = os.getenv("NUM_WORKERS", "2")
+
+
+MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "170")
+CPU_LIMIT = os.getenv("CPU_LIMIT", "24")
+GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
+GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
+GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
 NUM_SLOTS = os.getenv("NUM_SLOTS", "26")
 MAX_NNZ = os.getenv("MAX_NNZ", "2")
