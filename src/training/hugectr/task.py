@@ -294,7 +294,11 @@ if __name__ == '__main__':
   logging.info('Args: %s', parsed_args)
   start_time = time.time()
   logging.info('Starting training')
-
+  
+  # Set HugeCTR logging level to error to avoid excessive 
+  # logging during evaluation
+  os.environ['HUGECTR_LOG_LEVEL'] = '-1'
+  
   main(parsed_args)
 
   end_time = time.time()
