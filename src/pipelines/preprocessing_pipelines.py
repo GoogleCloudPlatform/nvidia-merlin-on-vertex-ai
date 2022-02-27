@@ -89,7 +89,7 @@ def preprocessing_csv(
       project_id=config.PROJECT_ID,
       region=config.REGION
   )
-  analyze_dataset.set_display_name('Convert validation split')#.set_caching_options(enable_caching=True)
+  analyze_dataset.set_display_name('Analyze')#.set_caching_options(enable_caching=True)
   analyze_dataset.set_cpu_limit(config.CPU_LIMIT)
   analyze_dataset.set_memory_limit(config.MEMORY_LIMIT)
   analyze_dataset.set_gpu_limit(config.GPU_LIMIT)
@@ -98,29 +98,37 @@ def preprocessing_csv(
   # ==================== Transform train and validation dataset =============
 
   # === Transform train data split
-  #components.transform_dataset_op(
-  #    workflow=analyze_dataset.outputs['workflow'],
-  #    parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
-  #    num_output_files=num_output_files_train,
-  #    n_workers=int(config.GPU_LIMIT),
-  #    instance_type=config.INSTANCE_TYPE,
-  #    gpu_type=config.GPU_TYPE,
-  #    image_uri=config.NVT_IMAGE_URI,
-  #    project_id=config.PROJECT_ID,
-  #    region=config.REGION,
-  #    workspace=config.WORKSPACE
-  #)
+  transform_train = components.transform_dataset_op(
+      workflow=analyze_dataset.outputs['workflow'],
+      parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
+      num_output_files=num_output_files_train,
+      n_workers=int(config.GPU_LIMIT),
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+  )
+  transform_train.set_display_name('Transform train split')#.set_caching_options(enable_caching=True)
+  transform_train.set_cpu_limit(config.CPU_LIMIT)
+  transform_train.set_memory_limit(config.MEMORY_LIMIT)
+  transform_train.set_gpu_limit(config.GPU_LIMIT)
+  transform_train.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # === Transform eval data split
-  #components.transform_dataset_op(
-  #    workflow=analyze_dataset.outputs['workflow'],
-  #    parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
-  #    num_output_files=num_output_files_valid,
-  #    n_workers=int(config.GPU_LIMIT),
-  #    instance_type=config.INSTANCE_TYPE,
-  #    gpu_type=config.GPU_TYPE,
-  #    image_uri=config.NVT_IMAGE_URI,
-  #    project_id=config.PROJECT_ID,
-  #    region=config.REGION,
-  #    workspace=config.WORKSPACE
-  #)
+  transform_valid = components.transform_dataset_op(
+      workflow=analyze_dataset.outputs['workflow'],
+      parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
+      num_output_files=num_output_files_valid,
+      n_workers=int(config.GPU_LIMIT),
+      instance_type=config.INSTANCE_TYPE,
+      gpu_type=config.GPU_TYPE,
+      image_uri=config.NVT_IMAGE_URI,
+      project_id=config.PROJECT_ID,
+      region=config.REGION,
+  )
+  transform_valid.set_display_name('Transform valid split')#.set_caching_options(enable_caching=True)
+  transform_valid.set_cpu_limit(config.CPU_LIMIT)
+  transform_valid.set_memory_limit(config.MEMORY_LIMIT)
+  transform_valid.set_gpu_limit(config.GPU_LIMIT)
+  transform_valid.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)

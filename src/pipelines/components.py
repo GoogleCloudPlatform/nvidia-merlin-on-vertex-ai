@@ -85,8 +85,6 @@ def convert_csv_to_parquet_op(
       create_cluster,
       create_csv_dataset,
       convert_csv_to_parquet,
-      create_parquet_dataset,
-      create_criteo_nvt_workflow,
       get_criteo_col_dtypes,
   )
 
@@ -103,7 +101,7 @@ def convert_csv_to_parquet_op(
     memory_limit
   )
   
-  logging.info('Creating CSV dataset')
+  logging.info(f'Creating CSV dataset from: {data_paths}')
   dataset = create_csv_dataset(
     data_paths,
     sep,
@@ -158,11 +156,8 @@ def analyze_dataset_op(
   
   from task import (
       create_cluster,
-      create_csv_dataset,
-      convert_csv_to_parquet,
       create_parquet_dataset,
       create_criteo_nvt_workflow,
-      get_criteo_col_dtypes,
   )
 
   logging.basicConfig(level=logging.INFO)
@@ -179,7 +174,7 @@ def analyze_dataset_op(
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
     data_path=os.path.join(parquet_dataset.uri, split),
-    part_mem_frac=part_mem_frac
+    part_mem_frac=frac_size
   )
 
   logging.info('Creating Workflow')
@@ -194,7 +189,7 @@ def analyze_dataset_op(
 
 
 @dsl.component(
-  packages_to_install=['google-cloud-aiplatform']
+  base_image=config.NVT_IMAGE_URI
 )
 def transform_dataset_op(
     workflow: Input[Artifact],
@@ -207,7 +202,6 @@ def transform_dataset_op(
     image_uri: str,
     project_id: str,
     region: str,
-    workspace: str,
     shuffle: str = None,
     device_limit_frac: float = 0.6,
     device_pool_frac: float = 0.9,
@@ -235,57 +229,49 @@ def transform_dataset_op(
   import os
   import time
   import logging
+  import nvtabular as nvt
+  
   from google.cloud import aiplatform as vertex_ai
+  
+  from task import (
+      create_cluster,
+      create_parquet_dataset,
+      save_dataset,
+  )
 
   logging.basicConfig(level=logging.INFO)
 
   split = parquet_dataset.metadata['split']
   transformed_dataset.metadata['split'] = split
-
-  worker_pool_specs =  [
-      {
-          "machine_spec": {
-              "machine_type": instance_type,
-              "accelerator_type": gpu_type,
-              "accelerator_count": n_workers,
-          },
-          "replica_count": 1,          
-          "disk_spec": {
-              "boot_disk_size_gb": 500
-          },
-          "container_spec": {
-              "image_uri": image_uri,
-              "command": ["python", "-m", "task"],
-              "args": [
-                  '--task=transform',
-                  f'--parquet_data_path={os.path.join(parquet_dataset.uri, split)}',
-                  f'--output_files={num_output_files}',
-                  f'--n_workers={n_workers}',
-                  f'--workflow_path={workflow.path}',
-                  f'--output_path={os.path.join(transformed_dataset.path, split)}'
-              ],
-          },
-      }
-  ]
-
-  vertex_ai.init(
-      project=project_id,
-      location=region,
-      staging_bucket=os.path.join(workspace, 'stg')
+  
+  logging.info('Creating cluster')
+  client = create_cluster(
+    n_workers,
+    device_limit_frac,
+    device_pool_frac,
+    memory_limit
   )
 
-  job_name = '{}_{}'.format('transform', time.strftime("%Y%m%d_%H%M%S"))
-  base_output_dir =  os.path.join(workspace, job_name)
-
-  job = vertex_ai.CustomJob(
-      display_name=job_name,
-      worker_pool_specs=worker_pool_specs,
-      base_output_dir=base_output_dir
+  data_path = os.path.join(parquet_dataset.uri, split)
+  logging.info(f'Creating Parquet dataset: {data_path}')
+  dataset = create_parquet_dataset(
+    data_path=data_path, 
+    part_mem_frac=frac_size
   )
 
-  job.run(
-      sync=True,
-      restart_job_on_worker_restart=False
+  logging.info('Loading Workflow')
+  criteo_workflow = nvt.Workflow.load(workflow.path, client)
+
+  logging.info('Transforming Dataset')
+  trans_dataset = criteo_workflow.transform(dataset)
+
+  
+  output_path = os.path.join(transformed_dataset.uri, split)
+  logging.info(f'Saving transformed dataset: {output_path}')
+  save_dataset(
+    trans_dataset,
+    output_path=output_path,
+    output_files=num_output_files
   )
 
 
