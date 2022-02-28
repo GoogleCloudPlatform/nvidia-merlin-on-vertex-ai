@@ -68,7 +68,7 @@ def evaluate_model(
     max_batchsize=2048,
     hit_rate_threshold=0.6,
     device_id=0,
-    use_gpu_embedding_cache=True,
+    use_gpu_embedding_cache=False,
     cache_size_percentage=0.6,
     i64_input_key=True):
   """Evaluates a model on a validation dataset."""
@@ -294,10 +294,6 @@ if __name__ == '__main__':
   logging.info('Args: %s', parsed_args)
   start_time = time.time()
   logging.info('Starting training')
-  
-  # Set HugeCTR logging level to error to avoid excessive 
-  # logging during evaluation
-  os.environ['HUGECTR_LOG_LEVEL'] = '-1'
   
   main(parsed_args)
 

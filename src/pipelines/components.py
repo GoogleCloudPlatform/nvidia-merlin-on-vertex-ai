@@ -266,7 +266,7 @@ def transform_dataset_op(
   trans_dataset = criteo_workflow.transform(dataset)
 
   
-  output_path = os.path.join(transformed_dataset.uri, split)
+  output_path = os.path.join(transformed_dataset.path, split)
   logging.info(f'Saving transformed dataset: {output_path}')
   save_dataset(
     trans_dataset,
