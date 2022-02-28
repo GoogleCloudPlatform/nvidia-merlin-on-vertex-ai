@@ -31,7 +31,6 @@ def convert_csv_to_parquet_op(
     output_dataset: Output[Dataset],
     data_paths: list,
     split: str,
-    sep: str,
     num_output_files: int,
     n_workers: int,
     instance_type: str,
@@ -62,8 +61,6 @@ def convert_csv_to_parquet_op(
         a combination of both.
     split: str
       Split name of the dataset. Example: train or valid
-    sep: str
-      CSV separator, example '\t'
     shuffle: str
       How to shuffle the converted CSV, default to None. Options:
         PER_PARTITION
@@ -101,9 +98,8 @@ def convert_csv_to_parquet_op(
                   '--task=convert',
                   f"--csv_data_path={' '.join(data_paths)}",
                   f'--output_path={os.path.join(output_dataset.path, split)}',
-                  f'--sep={sep}',
                   f'--n_workers={n_workers}',
-                  f'--output_files={num_output_files}',
+                  f'--output_files={num_output_files}'
               ],
           },
       }

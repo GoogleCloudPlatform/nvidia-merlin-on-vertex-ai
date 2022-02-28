@@ -318,7 +318,8 @@ def parse_args():
                       required=False)
   parser.add_argument('--sep',
                       type=str,
-                      required=False)
+                      required=False,
+                      default='\t')
   parser.add_argument('--frac_size',
                       type=float,
                       required=False,

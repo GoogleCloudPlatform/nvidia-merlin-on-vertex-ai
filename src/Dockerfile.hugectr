@@ -15,6 +15,7 @@
 FROM nvcr.io/nvidia/merlin/merlin-training:22.02
 
 RUN pip install cloudml-hypertune
+RUN pip install google-cloud-aiplatform kfp
 
 WORKDIR /src
 

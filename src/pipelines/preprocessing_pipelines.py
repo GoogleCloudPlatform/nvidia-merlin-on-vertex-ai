@@ -27,7 +27,6 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 def preprocessing_csv(
     train_paths: list,
     valid_paths: list,
-    sep: str,
     num_output_files_train: int,
     num_output_files_valid: int,
     shuffle: str
@@ -39,7 +38,6 @@ def preprocessing_csv(
   csv_to_parquet_train = components.convert_csv_to_parquet_op(
       data_paths=train_paths,
       split='train',
-      sep=sep,
       num_output_files=num_output_files_train,
       n_workers=int(config.GPU_LIMIT),
       shuffle=shuffle,
@@ -55,7 +53,6 @@ def preprocessing_csv(
   csv_to_parquet_valid = components.convert_csv_to_parquet_op(
       data_paths=valid_paths,
       split='valid',
-      sep=sep,
       num_output_files=num_output_files_valid,
       n_workers=int(config.GPU_LIMIT),
       shuffle=shuffle,
