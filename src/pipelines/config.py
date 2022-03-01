@@ -52,6 +52,8 @@ TRITON_IMAGE_URI = os.getenv("TRITON_IMAGE_URI",
                              f"gcr.io/{PROJECT_ID}/triton-serving")
 
 INSTANCE_TYPE = os.getenv("INSTANCE_TYPE", "n1-highmem-64")
+CPU_LIMIT = os.getenv("CPU_LIMIT", "64")
+MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "416")
 GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
 GPU_TYPE = os.getenv("GPU_TYPE", "NVIDIA_TESLA_T4")
 

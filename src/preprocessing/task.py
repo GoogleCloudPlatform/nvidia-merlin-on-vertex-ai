@@ -43,10 +43,10 @@ def create_cluster(
 
 def create_csv_dataset(
     data_paths,
-    sep,
     recursive,
     col_dtypes,
-    frac_size
+    frac_size,
+    sep='\t'
 ):
   """Create nvt.Dataset definition for CSV files."""
   fs_spec = fsspec.filesystem('gs')

@@ -25,7 +25,8 @@ from kfp.v2.dsl import Output
 
 
 @dsl.component(
-  packages_to_install=['google-cloud-aiplatform']
+  base_image=config.NVT_IMAGE_URI,
+  install_kfp_package=False
 )
 def convert_csv_to_parquet_op(
     output_dataset: Output[Dataset],
@@ -33,12 +34,6 @@ def convert_csv_to_parquet_op(
     split: str,
     num_output_files: int,
     n_workers: int,
-    instance_type: str,
-    gpu_type: str,
-    image_uri: str,
-    project_id: str,
-    region: str,
-    workspace: str,
     shuffle: Optional[str] = None,
     recursive: Optional[bool] = False,
     device_limit_frac: Optional[float] = 0.6,
@@ -74,70 +69,54 @@ def convert_csv_to_parquet_op(
     memory_limit: Optional[int] = 100_000_000_000
   """
   import os
-  import time
   import logging
-  from google.cloud import aiplatform as vertex_ai
+
+  from task import (
+      create_cluster,
+      create_csv_dataset,
+      convert_csv_to_parquet,
+      get_criteo_col_dtypes,
+  )
 
   logging.info('Base path in %s', output_dataset.path)
 
   # Write metadata
   output_dataset.metadata['split'] = split
 
-  worker_pool_specs =  [
-      {
-          "machine_spec": {
-              "machine_type": instance_type,
-              "accelerator_type": gpu_type,
-              "accelerator_count": n_workers,
-          },
-          "replica_count": 1,
-          "container_spec": {
-              "image_uri": image_uri,
-              "command": ["python", "-m", "task"],
-              "args": [
-                  '--task=convert',
-                  f"--csv_data_path={' '.join(data_paths)}",
-                  f'--output_path={os.path.join(output_dataset.path, split)}',
-                  f'--n_workers={n_workers}',
-                  f'--output_files={num_output_files}'
-              ],
-          },
-      }
-  ]
-
-  vertex_ai.init(
-      project=project_id,
-      location=region,
-      staging_bucket=os.path.join(workspace, 'stg')
+  logging.info('Creating cluster')
+  create_cluster(
+    n_workers=n_workers,
+    device_limit_frac=device_limit_frac,
+    device_pool_frac=device_pool_frac,
+    memory_limit=memory_limit
   )
-
-  job_name = '{}_{}'.format('convert', time.strftime("%Y%m%d_%H%M%S"))
-  base_output_dir =  os.path.join(workspace, job_name)
-
-  job = vertex_ai.CustomJob(
-      display_name=job_name,
-      worker_pool_specs=worker_pool_specs,
-      base_output_dir=base_output_dir
+  
+  logging.info(f'Creating CSV dataset from: {data_paths}')
+  dataset = create_csv_dataset(
+    data_paths=data_paths,
+    recursive=recursive,
+    col_dtypes=get_criteo_col_dtypes(),
+    frac_size=frac_size
   )
-  job.run(
-      sync=True,
-      restart_job_on_worker_restart=False
+  
+  output_path = os.path.join(output_dataset.uri, split)
+  logging.info(f'Converting CSV to Parquet; {output_path}')
+  convert_csv_to_parquet(
+    output_path=output_path,
+    dataset=dataset,
+    output_files=num_output_files,
+    shuffle=shuffle
   )
 
 
 @dsl.component(
-  packages_to_install=['google-cloud-aiplatform']
+  base_image=config.NVT_IMAGE_URI,
+  install_kfp_package=False
 )
 def analyze_dataset_op(
     parquet_dataset: Input[Dataset],
     workflow: Output[Artifact],
     n_workers: int,
-    instance_type: str,
-    gpu_type: str,
-    image_uri: str,
-    project_id: str,
-    region: str,
-    workspace: str,
     device_limit_frac: Optional[float] = 0.6,
     device_pool_frac: Optional[float] = 0.9,
     frac_size: Optional[float] = 0.10,
@@ -157,58 +136,45 @@ def analyze_dataset_op(
     frac_size: Optional[float] = 0.10
   """
   import os
-  import time
   import logging
-  from google.cloud import aiplatform as vertex_ai
+  
+  from task import (
+      create_cluster,
+      create_parquet_dataset,
+      create_criteo_nvt_workflow,
+  )
 
   logging.basicConfig(level=logging.INFO)
 
   split = parquet_dataset.metadata['split']
 
-  worker_pool_specs =  [
-      {
-          "machine_spec": {
-              "machine_type": instance_type,
-              "accelerator_type": gpu_type,
-              "accelerator_count": n_workers,
-          },
-          "replica_count": 1,
-          "container_spec": {
-              "image_uri": image_uri,
-              "command": ["python", "-m", "task"],
-              "args": [
-                  '--task=analyse',
-                  f'--parquet_data_path={os.path.join(parquet_dataset.uri, split)}',
-                  f'--n_workers={n_workers}',
-                  f'--output_path={workflow.path}'
-              ],
-          },
-      }
-  ]
-
-  vertex_ai.init(
-      project=project_id,
-      location=region,
-      staging_bucket=os.path.join(workspace, 'stg')
+  create_cluster(
+    n_workers=n_workers,
+    device_limit_frac=device_limit_frac,
+    device_pool_frac=device_pool_frac,
+    memory_limit=memory_limit
   )
 
-  job_name = '{}_{}'.format('analyse', time.strftime("%Y%m%d_%H%M%S"))
-  base_output_dir =  os.path.join(workspace, job_name)
-
-  job = vertex_ai.CustomJob(
-      display_name=job_name,
-      worker_pool_specs=worker_pool_specs,
-      base_output_dir=base_output_dir
+  logging.info('Creating Parquet dataset')
+  dataset = create_parquet_dataset(
+    data_path=os.path.join(parquet_dataset.uri, split),
+    part_mem_frac=frac_size
   )
 
-  job.run(
-      sync=True,
-      restart_job_on_worker_restart=False
-  )
+  logging.info('Creating Workflow')
+  # Create Workflow
+  criteo_workflow = create_criteo_nvt_workflow()
+
+  logging.info('Analyzing dataset')
+  criteo_workflow = criteo_workflow.fit(dataset)
+
+  logging.info('Saving Workflow')
+  criteo_workflow.save(workflow.path)
 
 
 @dsl.component(
-  packages_to_install=['google-cloud-aiplatform']
+  base_image=config.NVT_IMAGE_URI,
+  install_kfp_package=False
 )
 def transform_dataset_op(
     workflow: Input[Artifact],
@@ -216,12 +182,6 @@ def transform_dataset_op(
     transformed_dataset: Output[Dataset],
     num_output_files: int,
     n_workers: int,
-    instance_type: str,
-    gpu_type: str,
-    image_uri: str,
-    project_id: str,
-    region: str,
-    workspace: str,
     shuffle: str = None,
     device_limit_frac: float = 0.6,
     device_pool_frac: float = 0.9,
@@ -247,59 +207,48 @@ def transform_dataset_op(
     frac_size: float = 0.10
   """
   import os
-  import time
   import logging
-  from google.cloud import aiplatform as vertex_ai
+  import nvtabular as nvt
+  
+  from task import (
+      create_cluster,
+      create_parquet_dataset,
+      save_dataset,
+  )
 
   logging.basicConfig(level=logging.INFO)
 
   split = parquet_dataset.metadata['split']
   transformed_dataset.metadata['split'] = split
-
-  worker_pool_specs =  [
-      {
-          "machine_spec": {
-              "machine_type": instance_type,
-              "accelerator_type": gpu_type,
-              "accelerator_count": n_workers,
-          },
-          "replica_count": 1,          
-          "disk_spec": {
-              "boot_disk_size_gb": 500
-          },
-          "container_spec": {
-              "image_uri": image_uri,
-              "command": ["python", "-m", "task"],
-              "args": [
-                  '--task=transform',
-                  f'--parquet_data_path={os.path.join(parquet_dataset.uri, split)}',
-                  f'--output_files={num_output_files}',
-                  f'--n_workers={n_workers}',
-                  f'--workflow_path={workflow.path}',
-                  f'--output_path={os.path.join(transformed_dataset.path, split)}'
-              ],
-          },
-      }
-  ]
-
-  vertex_ai.init(
-      project=project_id,
-      location=region,
-      staging_bucket=os.path.join(workspace, 'stg')
+  
+  logging.info('Creating cluster')
+  client = create_cluster(
+    n_workers=n_workers,
+    device_limit_frac=device_limit_frac,
+    device_pool_frac=device_pool_frac,
+    memory_limit=memory_limit
   )
 
-  job_name = '{}_{}'.format('transform', time.strftime("%Y%m%d_%H%M%S"))
-  base_output_dir =  os.path.join(workspace, job_name)
-
-  job = vertex_ai.CustomJob(
-      display_name=job_name,
-      worker_pool_specs=worker_pool_specs,
-      base_output_dir=base_output_dir
+  data_path = os.path.join(parquet_dataset.uri, split)
+  logging.info(f'Creating Parquet dataset: {data_path}')
+  dataset = create_parquet_dataset(
+    data_path=data_path, 
+    part_mem_frac=frac_size
   )
 
-  job.run(
-      sync=True,
-      restart_job_on_worker_restart=False
+  logging.info('Loading Workflow')
+  criteo_workflow = nvt.Workflow.load(workflow.path, client)
+
+  logging.info('Transforming Dataset')
+  trans_dataset = criteo_workflow.transform(dataset)
+
+  output_path = os.path.join(transformed_dataset.uri, split)
+  logging.info(f'Saving transformed dataset: {output_path}')
+  save_dataset(
+    dataset=trans_dataset,
+    output_path=output_path,
+    output_files=num_output_files,
+    shuffle=shuffle
   )
 
 
