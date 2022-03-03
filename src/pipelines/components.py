@@ -100,6 +100,7 @@ def convert_csv_to_parquet_op(
   )
   
   output_path = os.path.join(output_dataset.uri, split)
+  
   logging.info(f'Converting CSV to Parquet; {output_path}')
   convert_csv_to_parquet(
     output_path=output_path,
@@ -158,7 +159,7 @@ def analyze_dataset_op(
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
     data_path=os.path.join(parquet_dataset.uri, split),
-    part_mem_frac=frac_size
+    frac_size=frac_size
   )
 
   logging.info('Creating Workflow')
@@ -177,7 +178,7 @@ def analyze_dataset_op(
   install_kfp_package=False
 )
 def transform_dataset_op(
-    workflow: Input[Artifact],
+    workflow: Input [Artifact],
     parquet_dataset: Input[Dataset],
     transformed_dataset: Output[Dataset],
     num_output_files: int,
@@ -232,8 +233,8 @@ def transform_dataset_op(
   data_path = os.path.join(parquet_dataset.uri, split)
   logging.info(f'Creating Parquet dataset: {data_path}')
   dataset = create_parquet_dataset(
-    data_path=data_path, 
-    part_mem_frac=frac_size
+    data_path=data_path,
+    frac_size=frac_size
   )
 
   logging.info('Loading Workflow')
@@ -253,7 +254,11 @@ def transform_dataset_op(
 
 
 @dsl.component(
-  packages_to_install=['google-cloud-aiplatform']
+  packages_to_install=[
+    'google-cloud-aiplatform', 
+    'google-cloud-pipeline-components',
+    'kfp'
+  ]
 )
 def train_hugectr_op(
     transformed_train_dataset: Input[Dataset],
@@ -287,6 +292,9 @@ def train_hugectr_op(
   import json
   import os
   from google.cloud import aiplatform as vertex_ai
+  from kfp.v2.google import experimental
+
+  from google_cloud_pipeline_components.v1.custom_job import CustomTrainingJobOp
 
   vertex_ai.init(
       project=project,
@@ -403,9 +411,7 @@ def upload_vertex_model(
     project: str,
     region: str,
     display_name: str,
-    serving_container_image_uri: str,
-    serving_container_environment_variables: dict = dict(),
-    labels: dict = dict()
+    serving_container_image_uri: str
 ):
   """Uploads model to vertex AI."""
   import logging

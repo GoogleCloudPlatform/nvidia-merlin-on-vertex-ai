@@ -123,16 +123,13 @@ def create_criteo_nvt_workflow():
 
 def create_parquet_dataset(
     data_path,
-    part_mem_frac
+    frac_size
 ):
   """Create a nvt.Dataset definition for the parquet files."""
   fs = fsspec.filesystem('gs')
   file_list = fs.glob(
       os.path.join(data_path, '*.parquet')
   )
-
-  device_size = device_mem_size()
-  part_size = int(part_mem_frac * device_size)
 
   if not file_list:
     raise FileNotFoundError('Parquet file(s) not found')
@@ -142,7 +139,7 @@ def create_parquet_dataset(
   return nvt.Dataset(
       file_list,
       engine='parquet',
-      part_size=part_size
+      part_mem_fraction=frac_size
   )
 
 
@@ -245,7 +242,7 @@ def main_analyse(args):
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
     data_path=args.parquet_data_path,
-    part_mem_frac=args.part_mem_frac
+    frac_size=args.frac_size
   )
 
   logging.info('Creating Workflow')
@@ -273,7 +270,7 @@ def main_transform(args):
   logging.info('Creating Parquet dataset')
   dataset = create_parquet_dataset(
     data_path=args.parquet_data_path, 
-    part_mem_frac=args.part_mem_frac
+    frac_size=args.frac_size
   )
 
   logging.info('Loading Workflow')
@@ -324,10 +321,6 @@ def parse_args():
                       type=float,
                       required=False,
                       default=0.10)
-  parser.add_argument('--part_mem_frac',
-                      type=float,
-                      required=False,
-                      default=0.15)
   parser.add_argument('--memory_limit',
                       type=int,
                       required=False,

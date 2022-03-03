@@ -33,7 +33,6 @@ def preprocessing_csv(
 ):
   """Pipeline to preprocess CSV files in GCS."""
   # ==================== Convert from CSV to Parquet ========================
-
   # === Convert train dataset from CSV to Parquet
   csv_to_parquet_train = components.convert_csv_to_parquet_op(
       data_paths=train_paths,
@@ -63,13 +62,12 @@ def preprocessing_csv(
   csv_to_parquet_valid.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # ==================== Analyse train dataset ==============================
-
   # === Analyze train data split
   analyze_dataset = components.analyze_dataset_op(
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
       n_workers=int(config.GPU_LIMIT)
   )
-  analyze_dataset.set_display_name('Analyze')#.set_caching_options(enable_caching=True)
+  analyze_dataset.set_display_name('Analyze Dataset')#.set_caching_options(enable_caching=True)
   analyze_dataset.set_cpu_limit(config.CPU_LIMIT)
   analyze_dataset.set_memory_limit(config.MEMORY_LIMIT)
   analyze_dataset.set_gpu_limit(config.GPU_LIMIT)
