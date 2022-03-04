@@ -32,7 +32,6 @@ def training_pipeline(
     valid_paths: list,
     num_output_files_train: int,
     num_output_files_valid: int,
-    sep: str,
     shuffle: str,
     per_gpu_batch_size: int,
     max_iter: int,
@@ -46,90 +45,84 @@ def training_pipeline(
     display_interval: int
 ):
   """Pipeline to train a HugeCTR model with data exported from GCS."""
+
   # ==================== Exporting tables as CSV ====================
 
   # === Convert train dataset from CSV to Parquet
   csv_to_parquet_train = components.convert_csv_to_parquet_op(
       data_paths=train_paths,
       split='train',
-      sep=sep,
       num_output_files=num_output_files_train,
       n_workers=int(config.GPU_LIMIT),
-      shuffle=shuffle,
-      instance_type=config.INSTANCE_TYPE,
-      gpu_type=config.GPU_TYPE,
-      image_uri=config.NVT_IMAGE_URI,
-      project_id=config.PROJECT_ID,
-      region=config.REGION,
-      workspace=config.WORKSPACE
+      shuffle=shuffle
   )
+  csv_to_parquet_train.set_display_name('Convert training split')
+  csv_to_parquet_train.set_cpu_limit(config.CPU_LIMIT)
+  csv_to_parquet_train.set_memory_limit(config.MEMORY_LIMIT)
+  csv_to_parquet_train.set_gpu_limit(config.GPU_LIMIT)
+  csv_to_parquet_train.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # === Convert eval dataset from CSV to Parquet
   csv_to_parquet_valid = components.convert_csv_to_parquet_op(
       data_paths=valid_paths,
       split='valid',
-      sep=sep,
       num_output_files=num_output_files_valid,
       n_workers=int(config.GPU_LIMIT),
-      shuffle=shuffle,
-      instance_type=config.INSTANCE_TYPE,
-      gpu_type=config.GPU_TYPE,
-      image_uri=config.NVT_IMAGE_URI,
-      project_id=config.PROJECT_ID,
-      region=config.REGION,
-      workspace=config.WORKSPACE
+      shuffle=shuffle
   )
+  csv_to_parquet_valid.set_display_name('Convert validation split')
+  csv_to_parquet_valid.set_cpu_limit(config.CPU_LIMIT)
+  csv_to_parquet_valid.set_memory_limit(config.MEMORY_LIMIT)
+  csv_to_parquet_valid.set_gpu_limit(config.GPU_LIMIT)
+  csv_to_parquet_valid.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # ==================== Analyse train dataset ==============================
 
   # === Analyze train data split
   analyze_dataset = components.analyze_dataset_op(
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
-      n_workers=int(config.GPU_LIMIT),
-      instance_type=config.INSTANCE_TYPE,
-      gpu_type=config.GPU_TYPE,
-      image_uri=config.NVT_IMAGE_URI,
-      project_id=config.PROJECT_ID,
-      region=config.REGION,
-      workspace=config.WORKSPACE
+      n_workers=int(config.GPU_LIMIT)
   )
+  analyze_dataset.set_display_name('Analyze')#.set_caching_options(enable_caching=True)
+  analyze_dataset.set_cpu_limit(config.CPU_LIMIT)
+  analyze_dataset.set_memory_limit(config.MEMORY_LIMIT)
+  analyze_dataset.set_gpu_limit(config.GPU_LIMIT)
+  analyze_dataset.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # ==================== Transform train and validation dataset =============
 
   # === Transform train data split
-  transform_train_dataset = components.transform_dataset_op(
+  transform_train = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_train.outputs['output_dataset'],
       num_output_files=num_output_files_train,
-      n_workers=int(config.GPU_LIMIT),
-      instance_type=config.INSTANCE_TYPE,
-      gpu_type=config.GPU_TYPE,
-      image_uri=config.NVT_IMAGE_URI,
-      project_id=config.PROJECT_ID,
-      region=config.REGION,
-      workspace=config.WORKSPACE
+      n_workers=int(config.GPU_LIMIT)
   )
+  transform_train.set_display_name('Transform train split')
+  transform_train.set_cpu_limit(config.CPU_LIMIT)
+  transform_train.set_memory_limit(config.MEMORY_LIMIT)
+  transform_train.set_gpu_limit(config.GPU_LIMIT)
+  transform_train.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # === Transform eval data split
-  transform_valid_dataset = components.transform_dataset_op(
+  transform_valid = components.transform_dataset_op(
       workflow=analyze_dataset.outputs['workflow'],
       parquet_dataset=csv_to_parquet_valid.outputs['output_dataset'],
       num_output_files=num_output_files_valid,
-      n_workers=int(config.GPU_LIMIT),
-      instance_type=config.INSTANCE_TYPE,
-      gpu_type=config.GPU_TYPE,
-      image_uri=config.NVT_IMAGE_URI,
-      project_id=config.PROJECT_ID,
-      region=config.REGION,
-      workspace=config.WORKSPACE
+      n_workers=int(config.GPU_LIMIT)
   )
+  transform_valid.set_display_name('Transform valid split')
+  transform_valid.set_cpu_limit(config.CPU_LIMIT)
+  transform_valid.set_memory_limit(config.MEMORY_LIMIT)
+  transform_valid.set_gpu_limit(config.GPU_LIMIT)
+  transform_valid.add_node_selector_constraint(GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
   # ==================== Train HugeCTR model ========================
 
   train_hugectr = components.train_hugectr_op(
-      transformed_train_dataset=transform_train_dataset.outputs[
+      transformed_train_dataset=transform_train.outputs[
           'transformed_dataset'],
-      transformed_valid_dataset=transform_valid_dataset.outputs[
+      transformed_valid_dataset=transform_valid.outputs[
           'transformed_dataset'],
       model_name=config.MODEL_NAME,
       project=config.PROJECT_ID,
