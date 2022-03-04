@@ -99,11 +99,9 @@ def convert_csv_to_parquet_op(
     frac_size=frac_size
   )
   
-  output_path = os.path.join(output_dataset.uri, split)
-  
-  logging.info(f'Converting CSV to Parquet; {output_path}')
+  logging.info(f'Converting CSV to Parquet; {output_dataset.uri}')
   convert_csv_to_parquet(
-    output_path=output_path,
+    output_path=output_dataset.uri,
     dataset=dataset,
     output_files=num_output_files,
     shuffle=shuffle
@@ -136,18 +134,15 @@ def analyze_dataset_op(
     device_pool_frac: Optional[float] = 0.9
     frac_size: Optional[float] = 0.10
   """
-  import os
   import logging
+  import nvtabular as nvt
   
   from task import (
       create_cluster,
-      create_parquet_dataset,
       create_criteo_nvt_workflow,
   )
 
   logging.basicConfig(level=logging.INFO)
-
-  split = parquet_dataset.metadata['split']
 
   create_cluster(
     n_workers=n_workers,
@@ -157,9 +152,10 @@ def analyze_dataset_op(
   )
 
   logging.info('Creating Parquet dataset')
-  dataset = create_parquet_dataset(
-    data_path=os.path.join(parquet_dataset.uri, split),
-    frac_size=frac_size
+  dataset = nvt.Dataset(
+      path_or_source=parquet_dataset.uri,
+      engine='parquet',
+      part_mem_fraction=frac_size
   )
 
   logging.info('Creating Workflow')
@@ -212,45 +208,57 @@ def transform_dataset_op(
   import nvtabular as nvt
   
   from task import (
-      create_cluster,
-      create_parquet_dataset,
-      save_dataset,
+    create_cluster,
+    save_dataset,
   )
 
   logging.basicConfig(level=logging.INFO)
 
-  split = parquet_dataset.metadata['split']
-  transformed_dataset.metadata['split'] = split
+  transformed_dataset.metadata['split'] = \
+    parquet_dataset.metadata['split']
   
   logging.info('Creating cluster')
-  client = create_cluster(
+  create_cluster(
     n_workers=n_workers,
     device_limit_frac=device_limit_frac,
     device_pool_frac=device_pool_frac,
     memory_limit=memory_limit
   )
 
-  data_path = os.path.join(parquet_dataset.uri, split)
-  logging.info(f'Creating Parquet dataset: {data_path}')
-  dataset = create_parquet_dataset(
-    data_path=data_path,
-    frac_size=frac_size
+  logging.info(f'Creating Parquet dataset: {parquet_dataset.uri}')
+  dataset = nvt.Dataset(
+      path_or_source=parquet_dataset.uri,
+      engine='parquet',
+      part_mem_fraction=frac_size
   )
 
   logging.info('Loading Workflow')
-  criteo_workflow = nvt.Workflow.load(workflow.path, client)
+  criteo_workflow = nvt.Workflow.load(workflow.path)
 
   logging.info('Transforming Dataset')
   trans_dataset = criteo_workflow.transform(dataset)
 
-  output_path = os.path.join(transformed_dataset.uri, split)
-  logging.info(f'Saving transformed dataset: {output_path}')
+  logging.info(f'Saving transformed dataset: {transformed_dataset.uri}')
   save_dataset(
     dataset=trans_dataset,
-    output_path=output_path,
+    output_path=transformed_dataset.uri,
     output_files=num_output_files,
     shuffle=shuffle
   )
+
+  logging.info('Generating file list for training.')
+  file_list = os.path.join(transformed_dataset.path, '_file_list.txt')
+
+  new_lines = []
+  with open(file_list, 'r') as fp:
+    lines = fp.readlines()
+    new_lines.append(lines[0])
+    for line in lines[1:]:
+      new_lines.append(line.replace('gs://', '/gcs/'))
+
+  gcs_file_list = os.path.join(transformed_dataset.path, '_gcs_file_list.txt')
+  with open(gcs_file_list, 'w') as fp:
+    fp.writelines(new_lines)
 
 
 @dsl.component(
@@ -292,22 +300,16 @@ def train_hugectr_op(
   import json
   import os
   from google.cloud import aiplatform as vertex_ai
-  from kfp.v2.google import experimental
 
-  from google_cloud_pipeline_components.v1.custom_job import CustomTrainingJobOp
-
-  vertex_ai.init(
-      project=project,
-      location=region,
-      staging_bucket=staging_location
+  train_data_fuse = os.path.join(
+    transformed_train_dataset.path, '_gcs_file_list.txt'
   )
-
-  train_data_fuse = os.path.join(transformed_train_dataset.path, 'train',
-                                 '_file_list.txt').replace('gs://', '/gcs/')
-  valid_data_fuse = os.path.join(transformed_valid_dataset.path, 'valid',
-                                 '_file_list.txt').replace('gs://', '/gcs/')
-  schema_path = os.path.join(transformed_train_dataset.path, 'train',
-                             'schema.pbtxt').replace('gs://', '/gcs/')
+  valid_data_fuse = os.path.join(
+    transformed_valid_dataset.path, '_gcs_file_list.txt'
+  )
+  schema_path = os.path.join(
+    transformed_train_dataset.path, 'schema.pbtxt'
+  )
 
   gpus = json.dumps([list(range(accelerator_count))]).replace(' ', '')
 
@@ -348,6 +350,12 @@ def train_hugectr_op(
   logging.info(worker_pool_specs)
 
   logging.info('Submitting a custom job to Vertex AI...')
+  vertex_ai.init(
+      project=project,
+      location=region,
+      staging_bucket=staging_location
+  )
+
   job = vertex_ai.CustomJob(
       display_name=job_display_name,
       worker_pool_specs=worker_pool_specs,
