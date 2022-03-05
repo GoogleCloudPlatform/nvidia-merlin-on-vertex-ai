@@ -387,6 +387,7 @@ def export_triton_ensemble(
 ):
   """Exports model ensamble for prediction."""
   import logging
+  import os
   from serving import export
   from serving import feature_utils
 
@@ -394,7 +395,7 @@ def export_triton_ensemble(
   export.export_ensemble(
       model_name=model_name,
       workflow_path=workflow.path,
-      saved_model_path=model.path,
+      saved_model_path=os.path.join(model.path, 'model'),
       output_path=exported_model.path,
       categorical_columns=feature_utils.categorical_columns(),
       continuous_columns=feature_utils.continuous_columns(),
