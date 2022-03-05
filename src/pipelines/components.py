@@ -440,4 +440,4 @@ def upload_vertex_model(
 
   model_uri = vertex_model.gca_resource.name
   logging.info('Model uploaded to Vertex AI: %s', model_uri)
-  uploaded_model.set_string_custom_property('model_uri', model_uri)
+  uploaded_model.metadata['model_uri'] = model_uri
