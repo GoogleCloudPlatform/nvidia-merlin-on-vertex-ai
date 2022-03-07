@@ -8,7 +8,7 @@ from dask.distributed import Client
 from dask_cuda import LocalCUDACluster
 import fsspec
 import nvtabular as nvt
-from nvtabular.io.shuffle import Shuffle
+from merlin.io.shuffle import Shuffle
 from nvtabular.ops import Categorify
 from nvtabular.ops import Clip
 from nvtabular.ops import FillMissing
