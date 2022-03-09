@@ -184,6 +184,10 @@ def parse_args():
                       type=str,
                       required=True,
                       help='Path to the schema.pbtxt file')
+  parser.add_argument('--slot_size_array',
+                      required=True,
+                      type=str,
+                      help='List with cardinalities of categorical columns')
   parser.add_argument('--dropout_rate',
                       type=float,
                       required=False,
@@ -283,13 +287,11 @@ if __name__ == '__main__':
 
   parsed_args = parse_args()
 
-  logging.info('Extracting cardinalities from schema...')
-  cardinalities = utils.retrieve_cardinalities(parsed_args.schema)
-  logging.info('Cardinalities are extracted.')
-
-  parsed_args.slot_size_array = [int(cardinality)
-                                 for cardinality in cardinalities.values()]
   parsed_args.gpus = json.loads(parsed_args.gpus)
+
+  parsed_args.slot_size_array = [
+    int(i) for i in parsed_args.slot_size_array.split(sep=' ')
+  ]
 
   logging.info('Args: %s', parsed_args)
   start_time = time.time()

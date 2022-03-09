@@ -13,9 +13,8 @@
 # limitations under the License.
 """Utilities for model training."""
 
-from nvtabular.graph.schema import Schema
-from nvtabular.graph.tags import Tags
-
+from merlin.schema import Schema
+from merlin.schema import Tags
 
 def retrieve_cardinalities(schema_path):
   """Retrieves cardinalities from schema."""

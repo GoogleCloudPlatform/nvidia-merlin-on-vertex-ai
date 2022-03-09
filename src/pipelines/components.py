@@ -174,7 +174,7 @@ def analyze_dataset_op(
   install_kfp_package=False
 )
 def transform_dataset_op(
-    workflow: Input [Artifact],
+    workflow: Input[Artifact],
     parquet_dataset: Input[Dataset],
     transformed_dataset: Output[Dataset],
     num_output_files: int,
@@ -206,6 +206,7 @@ def transform_dataset_op(
   import os
   import logging
   import nvtabular as nvt
+  from merlin.schema import Tags
   
   from task import (
     create_cluster,
@@ -260,6 +261,17 @@ def transform_dataset_op(
   with open(gcs_file_list, 'w') as fp:
     fp.writelines(new_lines)
 
+  logging.info('Saving cardinalities')
+  cols_schemas = criteo_workflow.output_schema.select_by_tag(Tags.CATEGORICAL)
+  cols_names = cols_schemas.column_names
+
+  cards = []
+  for c in cols_names:
+    col = cols_schemas.get(c)
+    cards.append(col.properties['embedding_sizes']['cardinality'])
+
+  transformed_dataset.metadata['cardinalities'] = cards
+
 
 @dsl.component(
   packages_to_install=[
@@ -301,6 +313,10 @@ def train_hugectr_op(
   import os
   from google.cloud import aiplatform as vertex_ai
 
+  cardinalities = ' '.join(
+    [str(c) for c in transformed_train_dataset.metadata['cardinalities']]
+  )
+
   train_data_fuse = os.path.join(
     transformed_train_dataset.path, '_gcs_file_list.txt'
   )
@@ -330,6 +346,7 @@ def train_hugectr_op(
                   f'--train_data={train_data_fuse}',
                   f'--valid_data={valid_data_fuse}',
                   f'--schema={schema_path}',
+                  f'--slot_size_array={cardinalities}',
                   f'--max_iter={max_iter}',
                   f'--max_eval_batches={max_eval_batches}',
                   f'--eval_batches={eval_batches}',
