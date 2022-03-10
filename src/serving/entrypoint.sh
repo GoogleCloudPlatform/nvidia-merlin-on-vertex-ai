@@ -35,12 +35,11 @@ fi
 
 if [ -z "$1" ]
   then
-    MODEL_REPOSITORY=/models
+    MODEL_REPOSITORY=/model
   else
     MODEL_REPOSITORY=$1
 fi
 
-    
 echo "Copying model ensemble from ${AIP_STORAGE_URI} to ${MODEL_REPOSITORY}"
 mkdir ${MODEL_REPOSITORY} 
 gsutil -m cp -r ${AIP_STORAGE_URI}/* ${MODEL_REPOSITORY}
