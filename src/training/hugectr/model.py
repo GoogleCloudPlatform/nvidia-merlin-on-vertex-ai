@@ -26,7 +26,7 @@ def create_model(
     batchsize: int = 2048,
     lr: float = 0.001,
     dropout_rate: float = 0.5,
-    workspace_size_per_gpu: float = 61,
+    workspace_size_per_gpu: float = 2000,
     num_dense_features: int = 13,
     num_sparse_features: int = 26,
     nnz_per_slot: int = 2,
