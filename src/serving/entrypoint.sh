@@ -49,5 +49,4 @@ ENSEMBLE_DIR=$(ls ${MODEL_REPOSITORY} | grep ens)
 mkdir ${MODEL_REPOSITORY}/${ENSEMBLE_DIR}/1 
 
 echo "Starting Triton Server"
-LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2 tritonserver --model-repository=$MODEL_REPOSITORY \
---backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
+tritonserver --model-repository=$MODEL_REPOSITORY --backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
