@@ -17,6 +17,7 @@ import json
 import os
 import pathlib
 from google.protobuf import text_format
+from numpy import true_divide
 
 import nvtabular as nvt
 from nvtabular.inference.triton import export_hugectr_ensemble
@@ -29,6 +30,8 @@ HUGECTR_CONFIG_FILENAME = 'ps.json'
 
 def create_hugectr_backend_config(
     model_path,
+    max_batch_size,
+    deployed_device_list=[0],
     model_repository_path='/models'):
   """Creates configurations definition for HugeCTR backend."""
 
@@ -53,6 +56,15 @@ def create_hugectr_backend_config(
   model['sparse_files'] = sparse_paths
   model['dense_file'] = dense_path
   model['network_file'] = network_file
+  model['num_of_worker_buffer_in_pool'] = 4
+  model['num_of_refresher_buffer_in_pool'] = 1
+  model['deployed_device_list'] = deployed_device_list
+  model['max_batch_size'] = max_batch_size
+  model['default_value_for_each_table'] = [0.0]
+  model['hit_rate_threshold'] = 0.9
+  model['gpucacheper'] = 0.5
+  model['gpucache'] = True
+  model['cache_refresh_percentage_per_iteration'] = 0.2
   config_dict['models'] = [model]
 
   return config_dict
@@ -103,6 +115,8 @@ def export_ensemble(
 
   hugectr_backend_config = create_hugectr_backend_config(
       model_path=os.path.join(output_path, model_name, '1'),
+      max_batch_size=max_batch_size,
+      deployed_device_list=[0],
       model_repository_path=model_repository_path)
 
   with open(os.path.join(output_path, HUGECTR_CONFIG_FILENAME), 'w') as f:
