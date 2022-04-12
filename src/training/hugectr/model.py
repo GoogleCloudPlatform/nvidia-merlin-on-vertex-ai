@@ -26,7 +26,7 @@ def create_model(
     batchsize: int = 2048,
     lr: float = 0.001,
     dropout_rate: float = 0.5,
-    workspace_size_per_gpu: float = 2000,
+    workspace_size_per_gpu: float = 4000,
     num_dense_features: int = 13,
     num_sparse_features: int = 26,
     nnz_per_slot: int = 2,
@@ -69,7 +69,7 @@ def create_model(
           "data1", nnz_per_slot, False, num_sparse_features)]))
 
   model.add(hugectr.SparseEmbedding(
-      embedding_type=hugectr.Embedding_t.LocalizedSlotSparseEmbeddingHash,
+      embedding_type=hugectr.Embedding_t.DistributedSlotSparseEmbeddingHash,
       workspace_size_per_gpu_in_mb=workspace_size_per_gpu,
       embedding_vec_size=11,
       combiner="sum",
