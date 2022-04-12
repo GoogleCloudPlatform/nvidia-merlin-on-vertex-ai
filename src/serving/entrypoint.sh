@@ -49,4 +49,4 @@ ENSEMBLE_DIR=$(ls ${MODEL_REPOSITORY} | grep ens)
 mkdir ${MODEL_REPOSITORY}/${ENSEMBLE_DIR}/1 
 
 echo "Starting Triton Server"
-tritonserver --model-repository=$MODEL_REPOSITORY --backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
+LD_PRELOAD=/usr/local/lib tritonserver --model-repository=$MODEL_REPOSITORY --backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
