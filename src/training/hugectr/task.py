@@ -268,7 +268,7 @@ def parse_args():
   parser.add_argument('--workspace_size_per_gpu',
                       type=int,
                       required=False,
-                      default=2000,
+                      default=4000,
                       help='Workspace size per gpu in MB')
   parser.add_argument('--num_workers',
                       type=int,
