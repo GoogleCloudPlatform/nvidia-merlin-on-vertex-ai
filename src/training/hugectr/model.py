@@ -26,7 +26,7 @@ def create_model(
     batchsize: int = 2048,
     lr: float = 0.001,
     dropout_rate: float = 0.5,
-    workspace_size_per_gpu: float = 4000,
+    workspace_size_per_gpu: float = 8000,
     num_dense_features: int = 13,
     num_sparse_features: int = 26,
     nnz_per_slot: int = 2,
@@ -75,7 +75,7 @@ def create_model(
       combiner="sum",
       sparse_embedding_name="sparse_embedding1",
       bottom_name="data1",
-      slot_size_array=slot_size_array,
+    #   slot_size_array=slot_size_array,
       optimizer=optimizer))
 
   model.add(hugectr.DenseLayer(layer_type=hugectr.Layer_t.Reshape,
