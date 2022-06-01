@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nvcr.io/nvidia/merlin/merlin-training:21.12
+FROM nvcr.io/nvidia/merlin/merlin-training:22.04
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && apt-get update -y && apt-get install google-cloud-sdk -y
-RUN pip install google-cloud-aiplatform==1.7.0 google-cloud-pipeline-components==0.2.0 google-cloud-bigquery-storage==2.10.1
+RUN pip install google-cloud-aiplatform google-cloud-pipeline-components google-cloud-bigquery-storage kfp
