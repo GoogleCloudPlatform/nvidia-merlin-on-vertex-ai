@@ -47,6 +47,7 @@ gsutil -m cp -r ${AIP_STORAGE_URI}/* ${MODEL_REPOSITORY}
 # gsutil does not copy empty dirs so create a version folder for the ensemble
 ENSEMBLE_DIR=$(ls ${MODEL_REPOSITORY} | grep ens)
 mkdir ${MODEL_REPOSITORY}/${ENSEMBLE_DIR}/1 
+export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
 echo "Starting Triton Server"
-LD_PRELOAD=/usr/local/lib tritonserver --model-repository=$MODEL_REPOSITORY --backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
+LD_PRELOAD=/usr/local/lib/libarrow.so tritonserver --allow-metrics=false --vertex-ai-default-model=deepfm_ens --model-repository=$MODEL_REPOSITORY --backend-config=hugectr,ps=$MODEL_REPOSITORY/ps.json 
