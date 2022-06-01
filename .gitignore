@@ -130,6 +130,7 @@ dmypy.json
 
 # VSCode config
 .vscode
+.devcontainer
 
 #PyCharm config
 .idea
