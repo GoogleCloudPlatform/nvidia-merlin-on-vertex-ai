@@ -117,7 +117,6 @@ REGION=<YOUR REGION>
 BUCKET_NAME=<YOUR BUCKET_NAME>
 
 gsutil mb -l $REGION gs://$BUCKET_NAME
-
 ```
 
 ### Building Merlin development container image
@@ -129,9 +128,8 @@ From [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell), run t
 1. Get Dockerfile for the Merlin development image:
 ```
 SRC_REPO=https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
-LOCAL_DIR=merlin-env-setup
-kpt pkg get $SRC_REPO/env-config@main $LOCAL_DIR
-cd $LOCAL_DIR
+git clone $SRC_REPO
+cd $SRC_REPO/env-config
 ```
 2. Build and push the development image
 ```
@@ -157,10 +155,3 @@ After the Vertex Workbench managed notebook is created, peform the following ste
     git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
     cd nvidia-merlin-on-vertex-ai
     ```
-    
-    
-
-
-
-
-
