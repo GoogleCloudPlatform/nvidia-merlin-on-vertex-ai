@@ -140,7 +140,7 @@ gcloud builds submit --timeout "2h" --tag ${IMAGE_URI} . --machine-type=e2-highc
 
 ### Creating and configuring an instance of Vertex Workbench managed notebook
 
-This section provides step for provisioning a Vertex AI Workbench managed notebook and configuring a custom kernel based on the image created in the previous step. Follow the instructions in the [Create a managed notebooks instance how-to guide](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance):
+This section provides steps for provisioning a Vertex AI Workbench managed notebook and configuring a custom kernel based on the image created in the previous step. Follow the instructions in the [Create a managed notebooks instance how-to guide](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance):
 
 1. In the [Use custom Docker images settings](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#use_custom_docker_images) enter a name of the image you created in the previous step: `gcr.io/<your-project-id>/merlin-vertex-dev:latest`
 2. In the [Configure hardware settings](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#configure_hardware) select your GPU configuration. We recommend a machine with two `NVIDIA Tesla T4` or `NVIDIA Tesla A100` GPUs. 
