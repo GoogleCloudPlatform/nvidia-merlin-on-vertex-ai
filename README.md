@@ -151,7 +151,7 @@ After the Vertex Workbench managed notebook is created, peform the following ste
 1. Click on the OPEN JUPYTERLAB link on the notebook instance.
 2. Click on the New Launcher button, then start a new terminal session.
 3. Clone the repository to your notebook instance:
-    ```
-    git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
-    cd nvidia-merlin-on-vertex-ai
-    ```
+```
+git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
+cd nvidia-merlin-on-vertex-ai
+```
