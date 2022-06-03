@@ -146,8 +146,8 @@ This section provides steps for provisioning a Vertex AI Workbench managed noteb
 2. In `Permission`, choose `Service Account` and `Compute Engine default service account` as the authentication method.
 3. Open the `Advanced Options`.
 4. In `Environment > Custom docker images` [(Use custom Docker images settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#use_custom_docker_images) enter a name of the image you created in the previous step: `gcr.io/<your-project-id>/merlin-vertex-dev:latest`
-5. In `Hardware configuration` [(Configure hardware settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#configure_hardware) select your GPU configuration. We recommend a machine with two `NVIDIA Tesla T4` or `NVIDIA Tesla A100` GPUs. 
-5.1. Make sure you selected the option `Install NVIDIA GPU driver automatically for me`.
+5. In `Hardware configuration` [(Configure hardware settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#configure_hardware) select your GPU configuration. We recommend a machine with two `NVIDIA Tesla T4` or `NVIDIA Tesla A100` GPUs.  
+    5.1. Make sure you selected the option `Install NVIDIA GPU driver automatically for me`.
 7. In `Idle shutdown`, uncheck this option.
 8. In `Security`, check `Enable Terminal`.
 9. Click `Create`.
@@ -155,8 +155,8 @@ This section provides steps for provisioning a Vertex AI Workbench managed noteb
 ### Install the samples
 After the Vertex Workbench managed notebook is created, peform the following steps:
 
-1. Click on the OPEN JUPYTERLAB link on the notebook instance.
-2. Click on the New Launcher button, then start a new terminal session.
+1. Click on the `OPEN JUPYTERLAB` link on the notebook instance.
+2. On the `Launcher` page, start a new terminal session by clicking on the terminal icon.
 3. Clone the repository to your notebook instance:
 ```
 git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
@@ -165,4 +165,4 @@ cd nvidia-merlin-on-vertex-ai
 4. Wait for the Kernel to finish loading. You can follow the status of this task in the `Activity Log` on the right side panel.
 5. Follow the instructions on the notebooks provided in this repository. Make sure you are executing these notebooks with the newly installed kernel (merlin-vertex-dev).
 
-If you have any question or if you found any problem with this repository, please file a bug in this page.
+If you have any questions or if you found any problems with this repository, please report a bug in this page.
