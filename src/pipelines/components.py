@@ -313,9 +313,18 @@ def train_hugectr_op(
   import os
   from google.cloud import aiplatform as vertex_ai
 
-  cardinalities = ' '.join(
-    [str(c) for c in transformed_train_dataset.metadata['cardinalities']]
-  )
+  # cardinalities = ' '.join(
+  #   [str(c) for c in transformed_train_dataset.metadata['cardinalities']]
+  # )
+
+  cardinalities = []
+  for c in transformed_train_dataset.metadata['cardinalities']:
+    if c > 9999999:
+      cardinalities.append('9999999')
+    else:
+      cardinalities.append(str(c))
+
+  cardinalities = ' '.join(cardinalities)
 
   train_data_fuse = os.path.join(
     transformed_train_dataset.path, '_gcs_file_list.txt'

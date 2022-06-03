@@ -75,7 +75,6 @@ def create_model(
       combiner="sum",
       sparse_embedding_name="sparse_embedding1",
       bottom_name="data1",
-    #   slot_size_array=slot_size_array,
       optimizer=optimizer))
 
   model.add(hugectr.DenseLayer(layer_type=hugectr.Layer_t.Reshape,
