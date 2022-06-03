@@ -160,7 +160,6 @@ After the Vertex Workbench managed notebook is created, peform the following ste
 3. Clone the repository to your notebook instance:
 ```
 git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
-cd nvidia-merlin-on-vertex-ai
 ```
 4. Wait for the Kernel to finish loading. You can follow the status of this task in the `Activity Log` on the right side panel.
 5. Follow the instructions on the notebooks provided in this repository. Make sure you are executing these notebooks with the newly installed kernel (merlin-vertex-dev).
