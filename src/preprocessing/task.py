@@ -110,7 +110,8 @@ def create_criteo_nvt_workflow():
   cat_names = ['C' + str(x) for x in range(1, 27)]
 
   # Transformation pipeline  
-  categorify_op = Categorify()
+  num_buckets = 10000000
+  categorify_op = Categorify(max_size=num_buckets)
   cat_features = cat_names >> categorify_op
   cont_features = cont_names >> FillMissing() >> Clip(
       min_value=0) >> Normalize()
