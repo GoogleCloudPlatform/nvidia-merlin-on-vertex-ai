@@ -115,7 +115,6 @@ From [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell), run t
 ```
 REGION=<YOUR REGION>
 BUCKET_NAME=<YOUR BUCKET_NAME>
-
 gsutil mb -l $REGION gs://$BUCKET_NAME
 ```
 
@@ -127,10 +126,10 @@ From [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell), run t
 
 1. Get Dockerfile for the Merlin development image:
 ```
-SRC_REPO=https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
-git clone $SRC_REPO
-cd $SRC_REPO/env-config
+git clone https://github.com/GoogleCloudPlatform/nvidia-merlin-on-vertex-ai
+cd nvidia-merlin-on-vertex-ai/env-config
 ```
+
 2. Build and push the development image
 ```
 PROJECT_ID=<YOUR PROJECT ID> # change to your project id.
