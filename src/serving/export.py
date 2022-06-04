@@ -32,7 +32,7 @@ def create_hugectr_backend_config(
     model_path,
     max_batch_size,
     deployed_device_list=[0],
-    model_repository_path='/models'):
+    model_repository_path='/model'):
   """Creates configurations definition for HugeCTR backend."""
 
   p = pathlib.Path(model_path)
@@ -83,7 +83,7 @@ def export_ensemble(
     num_outputs,
     embedding_vector_size,
     max_batch_size,
-    model_repository_path='/models'
+    model_repository_path='/model'
 ):
   """Exports ensemble of models."""
   workflow = nvt.Workflow.load(workflow_path)
