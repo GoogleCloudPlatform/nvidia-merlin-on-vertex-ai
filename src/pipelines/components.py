@@ -454,13 +454,13 @@ def upload_vertex_model(
 
   vertex_ai.init(project=project, location=region)
 
-  exported_model_path = exported_model.path
+  exported_model_uri = exported_model.uri
 
-  logging.info('Exported model location: %s', exported_model_path)
+  logging.info('Exported model location: %s', exported_model_uri)
 
   vertex_model = vertex_ai.Model.upload(
       display_name=display_name,
-      artifact_uri=exported_model_path,
+      artifact_uri=exported_model_uri,
       serving_container_image_uri=serving_container_image_uri
   )
 
