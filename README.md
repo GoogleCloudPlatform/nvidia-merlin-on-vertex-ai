@@ -142,13 +142,13 @@ gcloud builds submit --timeout "2h" --tag ${IMAGE_URI} . --machine-type=e2-highc
 This section provides steps for provisioning a Vertex AI Workbench managed notebook and configuring a custom kernel based on the image created in the previous step.  
 **IMPORTANT**: Make sure you are following these steps on the same project as before.
 
-1. Start the creation of a Managed Notebook in Workbench following the instructions in the [Create a managed notebooks instance how-to guide](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance):
+1. Start the creation of a Managed Notebook in Workbench following the instructions in [Create a managed notebooks instance how-to guide](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance).
 2. In `Permission`, choose `Service Account` and `Compute Engine default service account` as the authentication method.
 3. Open the `Advanced Options`.
-4. In `Environment > Custom docker images` [(Use custom Docker images settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#use_custom_docker_images) enter a name of the image you created in the previous step: `gcr.io/<your-project-id>/merlin-vertex-dev:latest`
-5. In `Hardware configuration` [(Configure hardware settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#configure_hardware) select your GPU configuration. We recommend a machine with two `NVIDIA Tesla T4` or `NVIDIA Tesla A100` GPUs.  
+4. In `Environment > Custom docker images` [(Use custom Docker images settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#use_custom_docker_images) select `Provide custom docker images` and enter the name of the image you created in the previous step: `gcr.io/<your-project-id>/merlin-vertex-dev:latest`
+5. In `Hardware configuration` [(Configure hardware settings)](https://cloud.google.com/vertex-ai/docs/workbench/managed/create-instance#configure_hardware) select your GPU configuration. We recommend a machine with two `NVIDIA Tesla T4` or one `NVIDIA Tesla A100` GPUs.  
     5.1. Make sure you selected the option `Install NVIDIA GPU driver automatically for me`.
-7. In `Idle shutdown`, uncheck this option.
+7. Uncheck `Idle shutdown`.
 8. In `Security`, check `Enable Terminal`.
 9. Click `Create`.
 
